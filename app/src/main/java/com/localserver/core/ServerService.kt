@@ -46,10 +46,27 @@ class ServerService : Service() {
                 }
             }
         }
+
+        serviceScope.launch {
+            networkManager.availableAddresses.collect { addresses ->
+                val currentState = serverController.serverState.value
+                if (currentState is ServerState.Running) {
+                    updateNotification(currentState.copy(addresses = addresses))
+                }
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
+        if (intent == null) {
+            val config = lastConfig ?: ServerConfig()
+            Log.i(TAG, "ServerService auto-restarting after system kill on port ${config.port}")
+            startForeground(NOTIFICATION_ID, buildNotification("Restoring local media server..."))
+            serverController.start(config)
+            return START_STICKY
+        }
+
+        when (intent.action) {
             ACTION_STOP -> {
                 Log.i(TAG, "Received ACTION_STOP intent")
                 serverController.stop()
@@ -57,15 +74,17 @@ class ServerService : Service() {
             ACTION_START -> {
                 val port = intent.getIntExtra(EXTRA_PORT, ServerConfig.DEFAULT_PORT)
                 val bind = intent.getStringExtra(EXTRA_BIND_ADDRESS) ?: ServerConfig.DEFAULT_BIND_ADDRESS
+                val config = ServerConfig(port = port, bindAddress = bind)
+                lastConfig = config
                 Log.i(TAG, "Received ACTION_START intent for port $port on $bind")
                 startForeground(NOTIFICATION_ID, buildNotification("Starting local media server..."))
-                serverController.start(ServerConfig(port = port, bindAddress = bind))
+                serverController.start(config)
             }
             else -> {
-                Log.d(TAG, "Unhandled intent action: ${intent?.action}")
+                Log.d(TAG, "Unhandled intent action: ${intent.action}")
             }
         }
-        return START_NOT_STICKY
+        return START_STICKY
     }
 
     override fun onDestroy() {
@@ -199,6 +218,7 @@ class ServerService : Service() {
 
         private val _serviceState = MutableStateFlow<ServerState>(ServerState.Stopped)
         val serviceState: StateFlow<ServerState> = _serviceState.asStateFlow()
+        var lastConfig: ServerConfig? = null
 
         fun initSingletons(context: Context) {
             if (!::networkManager.isInitialized) {

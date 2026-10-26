@@ -74,7 +74,12 @@ class FileRepository(
         if (!targetDir.isDirectory) return null
 
         val entries = mutableListOf<FileEntry>()
-        val children = targetDir.listFiles()
+        val children = try {
+            targetDir.listFiles()
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to list files for share $shareId (permissions may have been revoked): ${e.message}")
+            return null
+        }
 
         for (child in children) {
             val name = child.name ?: continue

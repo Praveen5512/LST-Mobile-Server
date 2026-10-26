@@ -1,12 +1,16 @@
 package com.localserver
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.view.Gravity
+import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -60,6 +64,11 @@ class MainActivity : AppCompatActivity() {
         observeState()
     }
 
+    override fun onResume() {
+        super.onResume()
+        checkBatteryOptimization()
+    }
+
     private fun requestNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
@@ -69,6 +78,16 @@ class MainActivity : AppCompatActivity() {
             ) {
                 requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
+        }
+    }
+
+    private fun checkBatteryOptimization() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager
+            val isIgnoring = powerManager?.isIgnoringBatteryOptimizations(packageName) == true
+            binding.cardBatteryOptimization.visibility = if (isIgnoring) View.GONE else View.VISIBLE
+        } else {
+            binding.cardBatteryOptimization.visibility = View.GONE
         }
     }
 
@@ -92,6 +111,20 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnAddFolder.setOnClickListener {
             openDocumentTreeLauncher.launch(null)
+        }
+
+        binding.btnDisableBatteryOptimization.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                try {
+                    val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                        data = Uri.parse("package:$packageName")
+                    }
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    val fallbackIntent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                    startActivity(fallbackIntent)
+                }
+            }
         }
 
         binding.btnOpenBrowser.setOnClickListener {
@@ -151,8 +184,14 @@ class MainActivity : AppCompatActivity() {
             }
 
             val iconAndName = TextView(this).apply {
-                text = "📁 ${share.name}"
-                setTextColor(ContextCompat.getColor(this@MainActivity, R.color.text_primary))
+                val prefix = if (share.isAccessible) "📁 " else "⚠️ (Inaccessible) "
+                text = "$prefix${share.name}"
+                setTextColor(
+                    ContextCompat.getColor(
+                        this@MainActivity,
+                        if (share.isAccessible) R.color.text_primary else R.color.status_red
+                    )
+                )
                 textSize = 14f
                 layoutParams = LinearLayout.LayoutParams(
                     0,
@@ -220,6 +259,12 @@ class MainActivity : AppCompatActivity() {
                 binding.btnStop.isEnabled = false
                 binding.etPort.isEnabled = true
                 binding.btnOpenBrowser.isEnabled = false
+
+                // If port in use, auto-suggest next port
+                if (state.message.contains("already in use", ignoreCase = true)) {
+                    val current = binding.etPort.text?.toString()?.toIntOrNull() ?: ServerConfig.DEFAULT_PORT
+                    binding.etPort.setText((current + 1).toString())
+                }
             }
         }
     }

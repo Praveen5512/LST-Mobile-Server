@@ -16,7 +16,8 @@ data class ShareRoot(
     val id: String,
     val name: String,
     val uriString: String,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val isAccessible: Boolean = true
 ) {
     val uri: Uri get() = Uri.parse(uriString)
 }
@@ -76,8 +77,28 @@ class ShareRegistry(private val context: Context) {
         _shares.value = updated
     }
 
+    fun isShareAccessible(share: ShareRoot): Boolean {
+        return try {
+            val hasPersistedPermission = context.contentResolver.persistedUriPermissions.any {
+                it.uri == share.uri && it.isReadPermission
+            }
+            val doc = DocumentFile.fromTreeUri(context, share.uri)
+            hasPersistedPermission && doc != null && doc.canRead()
+        } catch (_: SecurityException) {
+            false
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     fun getShare(id: String): ShareRoot? {
-        return _shares.value.find { it.id == id }
+        val share = _shares.value.find { it.id == id } ?: return null
+        val accessible = isShareAccessible(share)
+        return if (share.isAccessible != accessible) {
+            share.copy(isAccessible = accessible)
+        } else {
+            share
+        }
     }
 
     private fun loadShares() {
@@ -87,14 +108,13 @@ class ShareRegistry(private val context: Context) {
             val array = JSONArray(raw)
             for (i in 0 until array.length()) {
                 val obj = array.getJSONObject(i)
-                list.add(
-                    ShareRoot(
-                        id = obj.getString("id"),
-                        name = obj.getString("name"),
-                        uriString = obj.getString("uriString"),
-                        createdAt = obj.optLong("createdAt", System.currentTimeMillis())
-                    )
+                val rawShare = ShareRoot(
+                    id = obj.getString("id"),
+                    name = obj.getString("name"),
+                    uriString = obj.getString("uriString"),
+                    createdAt = obj.optLong("createdAt", System.currentTimeMillis())
                 )
+                list.add(rawShare.copy(isAccessible = isShareAccessible(rawShare)))
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error loading shares from preferences", e)

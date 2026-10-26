@@ -70,6 +70,58 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Battery Optimization Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardBatteryOptimization"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="@color/surface"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#F59E0B"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🔋 Keep Server Alive When Screen Locks"
+                    android:textColor="#F59E0B"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Allowing background battery exemption prevents Android from putting Wi-Fi and the server to sleep when your screen is locked."
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDisableBatteryOptimization"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="38dp"
+                    android:layout_marginTop="10dp"
+                    android:text="Disable Battery Optimization"
+                    android:textAllCaps="false"
+                    android:textColor="#F59E0B"
+                    android:textSize="12sp"
+                    app:cornerRadius="6dp"
+                    app:strokeColor="#F59E0B" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Configuration Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
