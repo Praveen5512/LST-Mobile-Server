@@ -49,29 +49,7 @@ class FileRepository(
      * Sanitizes and normalizes a relative path within a share root.
      * Prevents directory traversal: rejects '..', null bytes, and leading/trailing separators.
      */
-    fun sanitizeRelativePath(rawPath: String?): String? {
-        if (rawPath.isNullOrBlank() || rawPath == "/" || rawPath == ".") {
-            return ""
-        }
-        val decoded = try {
-            URLDecoder.decode(rawPath, StandardCharsets.UTF_8.name())
-        } catch (_: Exception) {
-            return null
-        }
-
-        // Security check: reject null bytes, backslashes, or parent traversal
-        if (decoded.contains('\u0000') || decoded.contains('\\')) {
-            return null
-        }
-
-        val segments = decoded.split('/').filter { it.isNotEmpty() }
-        for (segment in segments) {
-            if (segment == ".." || segment == ".") {
-                return null // Attempt to escape directory hierarchy
-            }
-        }
-        return segments.joinToString("/")
-    }
+    fun sanitizeRelativePath(rawPath: String?): String? = Companion.sanitizeRelativePath(rawPath)
 
     /**
      * Lists directory contents at the given relative sub-path within a share.
@@ -256,5 +234,33 @@ class FileRepository(
 
     companion object {
         private const val TAG = "FileRepository"
+
+        /**
+         * Sanitizes and normalizes a relative path within a share root.
+         * Prevents directory traversal: rejects '..', null bytes, backslashes, and parent navigation.
+         */
+        fun sanitizeRelativePath(rawPath: String?): String? {
+            if (rawPath.isNullOrBlank() || rawPath == "/" || rawPath == ".") {
+                return ""
+            }
+            val decoded = try {
+                URLDecoder.decode(rawPath, StandardCharsets.UTF_8.name())
+            } catch (_: Exception) {
+                return null
+            }
+
+            // Security check: reject null bytes, backslashes, or parent traversal
+            if (decoded.contains('\u0000') || decoded.contains('\\')) {
+                return null
+            }
+
+            val segments = decoded.split('/').filter { it.isNotEmpty() }
+            for (segment in segments) {
+                if (segment == ".." || segment == ".") {
+                    return null // Attempt to escape directory hierarchy
+                }
+            }
+            return segments.joinToString("/")
+        }
     }
 }
