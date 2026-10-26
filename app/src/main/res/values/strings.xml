@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Local Media Server</string>
+    <string name="server_status_stopped">Server Stopped</string>
+    <string name="server_status_starting">Starting Server…</string>
+    <string name="server_status_running">Server Running</string>
+    <string name="server_status_error">Server Error</string>
+    <string name="btn_start_server">Start Server</string>
+    <string name="btn_stop_server">Stop Server</string>
+    <string name="port_label">Port</string>
+    <string name="interfaces_label">Network Interfaces &amp; URLs</string>
+    <string name="no_network_found">No active Wi-Fi or Hotspot network detected. Please connect to Wi-Fi or turn on Hotspot.</string>
+    <string name="notification_channel_name">Media Server Service</string>
+    <string name="notification_channel_desc">Shows ongoing status while the local HTTP server is running.</string>
+    <string name="notification_title">Local Media Server is Active</string>
+    <string name="notification_stop_action">Stop Server</string>
+    <string name="open_in_browser">Open in Local Browser</string>
+    <string name="security_notice">⚠️ Anyone on the same Wi-Fi or Hotspot network can access files shared by this server.</string>
+</resources>
