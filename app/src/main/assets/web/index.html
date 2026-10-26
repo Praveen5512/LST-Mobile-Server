@@ -580,6 +580,138 @@
             color: var(--text);
         }
 
+        .btn-music-ctrl.active {
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
+        }
+
+        .btn-like {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.15rem;
+            padding: 4px 6px;
+            color: var(--text-muted);
+            transition: transform 0.15s, color 0.15s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-like:hover {
+            transform: scale(1.2);
+            color: #f43f5e;
+        }
+
+        .btn-like.liked {
+            color: #f43f5e;
+            text-shadow: 0 0 8px rgba(244, 63, 94, 0.5);
+        }
+
+        /* Playlist Subnav & Header */
+        .playlist-subnav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .playlist-pills {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .playlist-pill {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 0.825rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .playlist-pill:hover {
+            color: var(--text);
+            border-color: var(--accent);
+        }
+
+        .playlist-pill.active {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .playlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* Video Keyboard & Toast */
+        .video-toast {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-size: 1.05rem;
+            font-weight: 700;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease-in-out;
+            z-index: 15;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .kbd-shortcuts-bar {
+            background: rgba(9, 13, 22, 0.85);
+            border-top: 1px solid var(--border);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .kbd-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        kbd {
+            background: var(--surface-card);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.725rem;
+            color: var(--accent);
+        }
+
         .btn-music-play {
             background: var(--accent);
             color: #090d16;
@@ -737,6 +869,21 @@
 
         <!-- Section 3: Music -->
         <div id="sectionMusic" style="display: none;">
+            <div class="playlist-subnav">
+                <div id="playlistPills" class="playlist-pills"></div>
+                <button class="btn-action" onclick="openNewPlaylistModal()">+ New Playlist</button>
+            </div>
+            <div class="playlist-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <h2 id="playlistTitle" style="font-size: 1.15rem; font-weight: 700;">All Tracks</h2>
+                    <span id="playlistCount" class="status-badge" style="background: rgba(56, 189, 248, 0.12); color: var(--accent); border-color: rgba(56, 189, 248, 0.3);">0 tracks</span>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn-action" onclick="playCurrentPlaylist(false)">▶ Play All</button>
+                    <button class="btn-action" onclick="playCurrentPlaylist(true)">🔀 Shuffle Play</button>
+                    <button id="btnDeletePlaylist" class="btn-action" style="display: none; color: var(--danger); border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1);" onclick="deleteCurrentPlaylist()">🗑 Delete Playlist</button>
+                </div>
+            </div>
             <div class="card-list">
                 <div id="musicTrackList">
                     <div class="empty-state">
@@ -766,7 +913,7 @@
     <!-- Persistent Music Player Bar -->
     <div id="musicBar" class="music-bar">
         <div class="music-track-info">
-            <div class="music-track-icon">🎵</div>
+            <button id="musicBarLikeBtn" class="btn-like" onclick="toggleCurrentMusicLike()" title="Like track">🤍</button>
             <div class="music-track-details">
                 <div id="musicBarTitle" class="music-track-title">No track selected</div>
                 <div id="musicBarSub" class="music-track-sub">Queue: 0 songs</div>
@@ -775,9 +922,11 @@
 
         <div class="music-controls">
             <div class="music-buttons">
-                <button class="btn-music-ctrl" onclick="playPrevMusic()">⏮</button>
-                <button id="btnMusicPlayPause" class="btn-music-play" onclick="toggleMusicPlay()">▶</button>
-                <button class="btn-music-ctrl" onclick="playNextMusic()">⏭</button>
+                <button id="btnMusicShuffle" class="btn-music-ctrl" title="Shuffle (S)" onclick="toggleShuffleMode()">🔀</button>
+                <button class="btn-music-ctrl" title="Previous" onclick="playPrevMusic()">⏮</button>
+                <button id="btnMusicPlayPause" class="btn-music-play" title="Play / Pause (Space)" onclick="toggleMusicPlay()">▶</button>
+                <button class="btn-music-ctrl" title="Next" onclick="playNextMusic()">⏭</button>
+                <button id="btnMusicRepeat" class="btn-music-ctrl" title="Repeat (Off)" onclick="toggleRepeatMode()">🔁</button>
             </div>
             <div class="music-timeline-box">
                 <span id="musicTimeCurrent">0:00</span>
@@ -799,13 +948,14 @@
                 <div id="videoModalTitle" class="modal-title">Video Player</div>
                 <button class="modal-close-btn" onclick="closeVideoModal()">&times;</button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="position: relative;">
                 <video id="html5VideoPlayer" controls playsinline preload="metadata">
                     Your browser does not support HTML5 video streaming.
                 </video>
+                <div id="videoToast" class="video-toast"></div>
             </div>
             <div class="modal-footer">
-                <div style="display: flex; gap: 6px; align-items: center;">
+                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
                     <span style="color: var(--text-muted);">Speed:</span>
                     <button class="btn-action" onclick="setVideoSpeed(1)">1x</button>
                     <button class="btn-action" onclick="setVideoSpeed(1.25)">1.25x</button>
@@ -813,6 +963,15 @@
                     <button class="btn-action" onclick="setVideoSpeed(2)">2x</button>
                 </div>
                 <a id="btnVideoDownload" class="btn-action" href="#" download>⬇ Download Video</a>
+            </div>
+            <div class="kbd-shortcuts-bar">
+                <span>⌨️ Desktop Controls:</span>
+                <span class="kbd-badge"><kbd>Space</kbd> Play/Pause</span>
+                <span class="kbd-badge"><kbd>←</kbd> <kbd>→</kbd> Seek ±5s</span>
+                <span class="kbd-badge"><kbd>↑</kbd> <kbd>↓</kbd> Vol</span>
+                <span class="kbd-badge"><kbd>F</kbd> Fullscreen</span>
+                <span class="kbd-badge"><kbd>M</kbd> Mute</span>
+                <span class="kbd-badge"><kbd>Esc</kbd> Close</span>
             </div>
         </div>
     </div>
@@ -859,6 +1018,43 @@
         </div>
     </div>
 
+    <!-- Create New Playlist Modal -->
+    <div id="newPlaylistModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 400px;">
+            <div class="modal-header">
+                <div class="modal-title">🎵 Create Playlist</div>
+                <button class="modal-close-btn" onclick="closeNewPlaylistModal()">&times;</button>
+            </div>
+            <div style="padding: 20px;">
+                <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 8px;">Playlist Name</label>
+                <input id="newPlaylistInput" class="search-input" style="width: 100%; margin-bottom: 16px;" type="text" placeholder="e.g. Chill Beats, Work Mix..." onkeydown="if(event.key==='Enter') createNewPlaylist()">
+                <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                    <button class="btn-action" style="background: transparent; color: var(--text-muted); border-color: var(--border);" onclick="closeNewPlaylistModal()">Cancel</button>
+                    <button class="btn-action" onclick="createNewPlaylist()">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Track to Playlist Modal -->
+    <div id="addToPlaylistModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 440px;">
+            <div class="modal-header">
+                <div class="modal-title">➕ Add to Playlist</div>
+                <button class="modal-close-btn" onclick="closeAddToPlaylistModal()">&times;</button>
+            </div>
+            <div style="padding: 20px;">
+                <div id="addToPlaylistTrackTitle" style="font-size: 0.9rem; font-weight: 600; color: var(--accent); margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Select a playlist:</div>
+                <div id="playlistChoicesList" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; margin-bottom: 16px;"></div>
+                <div style="border-top: 1px solid var(--border); padding-top: 14px; display: flex; gap: 8px;">
+                    <input id="quickNewPlaylistInput" class="search-input" style="flex: 1;" type="text" placeholder="New playlist name..." onkeydown="if(event.key==='Enter') quickCreateAndAdd()">
+                    <button class="btn-action" onclick="quickCreateAndAdd()">+ Create & Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Hidden audio element for continuous queue -->
     <audio id="globalAudioPlayer" preload="metadata"></audio>
 
@@ -878,6 +1074,15 @@
         let slideshowTimer = null;
         let currentPlayingVideoFileId = null;
 
+        // Desktop Audio & Playlist State
+        let likedSongs = JSON.parse(localStorage.getItem('media_liked_songs') || '[]');
+        let playlists = JSON.parse(localStorage.getItem('media_playlists') || '{}');
+        let currentPlaylistView = 'all'; // 'all', 'liked', or playlist name
+        let isShuffleMode = false;
+        let isRepeatMode = 0; // 0 = off, 1 = repeat all, 2 = repeat one
+        let selectedTrackForPlaylist = null;
+        let videoToastTimeout = null;
+
         const audioElement = document.getElementById('globalAudioPlayer');
         const videoElement = document.getElementById('html5VideoPlayer');
 
@@ -885,6 +1090,8 @@
         window.addEventListener('DOMContentLoaded', async () => {
             setupAudioEvents();
             setupVideoEvents();
+            setupKeyboardControls();
+            renderPlaylistPills();
             await loadShares();
             renderQrCode(window.location.origin);
         });
@@ -903,7 +1110,14 @@
             document.getElementById('searchInput').value = '';
 
             if (tab === 'videos' && videoItems.length === 0) loadMediaCategory('videos');
-            if (tab === 'music' && musicItems.length === 0) loadMediaCategory('music');
+            if (tab === 'music') {
+                if (musicItems.length === 0) {
+                    loadMediaCategory('music');
+                } else {
+                    renderPlaylistPills();
+                    renderCurrentMusicView();
+                }
+            }
             if (tab === 'photos' && photoItems.length === 0) loadMediaCategory('photos');
         }
 
@@ -1024,16 +1238,24 @@
                     `;
                 } else {
                     const isMedia = item.mimeType.startsWith('video/') || item.mimeType.startsWith('audio/') || item.mimeType.startsWith('image/');
+                    const isAudio = item.mimeType.startsWith('audio/');
+                    const liked = isAudio ? isSongLiked(item.fileId) : false;
+
                     return `
                         <div class="file-row">
                             <div class="file-info" onclick="handleItemClick(${escapeJson(item)})">
-                                <div class="file-icon">${icon}</div>
+                                ${isAudio ? `
+                                    <button class="btn-like ${liked ? 'liked' : ''}" data-fileid="${item.fileId}" title="${liked ? 'Unlike' : 'Like'}" onclick="toggleLikeSong(${escapeJson(item)}, event)">
+                                        ${liked ? '❤️' : '🤍'}
+                                    </button>
+                                ` : `<div class="file-icon">${icon}</div>`}
                                 <div class="file-name-block">
                                     <div class="file-title">${escapeHtml(item.name)}</div>
                                     <div class="file-subtitle">${sizeText} &bull; ${item.mimeType}</div>
                                 </div>
                             </div>
                             <div class="file-actions">
+                                ${isAudio ? `<button class="btn-action" title="Add to playlist" onclick="openAddToPlaylistModal(${escapeJson(item)}, event)">+ Playlist</button>` : ''}
                                 ${isMedia ? `<button class="btn-action" onclick="handleItemClick(${escapeJson(item)})">▶ Play</button>` : ''}
                                 <a class="btn-action" href="${item.downloadUrl}" download="${escapeHtml(item.name)}">⬇ Download</a>
                             </div>
@@ -1054,8 +1276,8 @@
                     renderVideosGrid(data);
                 } else if (category === 'music') {
                     musicItems = data;
-                    musicQueue = [...data];
-                    renderMusicList(data);
+                    renderPlaylistPills();
+                    renderCurrentMusicView();
                 } else if (category === 'photos') {
                     photoItems = data;
                     renderPhotosGrid(data);
@@ -1087,27 +1309,301 @@
             `).join('');
         }
 
-        function renderMusicList(items) {
-            const listEl = document.getElementById('musicTrackList');
-            if (items.length === 0) {
-                listEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🎵</div><div>No audio tracks found in shared folders.</div></div>';
+        // Liked Songs Management
+        function isSongLiked(fileId) {
+            return likedSongs.some(s => s.fileId === fileId);
+        }
+
+        function toggleLikeSong(track, event) {
+            if (event) event.stopPropagation();
+            const idx = likedSongs.findIndex(s => s.fileId === track.fileId);
+            if (idx >= 0) {
+                likedSongs.splice(idx, 1);
+                showToast("Removed from Liked Songs");
+            } else {
+                likedSongs.push(track);
+                showToast("❤️ Added to Liked Songs");
+            }
+            saveLikedSongs();
+            updateLikeButtonsUI();
+            renderPlaylistPills();
+            if (currentPlaylistView === 'liked') {
+                renderCurrentMusicView();
+            }
+        }
+
+        function toggleCurrentMusicLike() {
+            if (currentMusicIndex >= 0 && currentMusicIndex < musicQueue.length) {
+                toggleLikeSong(musicQueue[currentMusicIndex]);
+            }
+        }
+
+        function saveLikedSongs() {
+            localStorage.setItem('media_liked_songs', JSON.stringify(likedSongs));
+        }
+
+        function updateLikeButtonsUI() {
+            if (currentMusicIndex >= 0 && currentMusicIndex < musicQueue.length) {
+                const currentTrack = musicQueue[currentMusicIndex];
+                const liked = isSongLiked(currentTrack.fileId);
+                const btn = document.getElementById('musicBarLikeBtn');
+                btn.innerText = liked ? '❤️' : '🤍';
+                btn.classList.toggle('liked', liked);
+            }
+            document.querySelectorAll('.btn-like[data-fileid]').forEach(btn => {
+                const fid = btn.getAttribute('data-fileid');
+                const liked = isSongLiked(fid);
+                btn.innerText = liked ? '❤️' : '🤍';
+                btn.classList.toggle('liked', liked);
+            });
+        }
+
+        // Custom Playlists Management
+        function savePlaylists() {
+            localStorage.setItem('media_playlists', JSON.stringify(playlists));
+        }
+
+        function renderPlaylistPills() {
+            const container = document.getElementById('playlistPills');
+            if (!container) return;
+            const totalLiked = likedSongs.length;
+            const customNames = Object.keys(playlists);
+
+            let html = `
+                <button class="playlist-pill ${currentPlaylistView === 'all' ? 'active' : ''}" onclick="selectPlaylistView('all')">
+                    🎵 All Tracks (${musicItems.length})
+                </button>
+                <button class="playlist-pill ${currentPlaylistView === 'liked' ? 'active' : ''}" onclick="selectPlaylistView('liked')">
+                    ❤️ Liked Songs (${totalLiked})
+                </button>
+            `;
+
+            for (const name of customNames) {
+                const count = (playlists[name] || []).length;
+                html += `
+                    <button class="playlist-pill ${currentPlaylistView === name ? 'active' : ''}" onclick="selectPlaylistView('${escapeHtml(name)}')">
+                        📁 ${escapeHtml(name)} (${count})
+                    </button>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function selectPlaylistView(view) {
+            currentPlaylistView = view;
+            renderPlaylistPills();
+            renderCurrentMusicView();
+        }
+
+        function getCurrentViewTracks() {
+            if (currentPlaylistView === 'all') {
+                return musicItems;
+            } else if (currentPlaylistView === 'liked') {
+                return likedSongs;
+            } else {
+                return playlists[currentPlaylistView] || [];
+            }
+        }
+
+        function renderCurrentMusicView() {
+            const tracks = getCurrentViewTracks();
+            const titleEl = document.getElementById('playlistTitle');
+            const countEl = document.getElementById('playlistCount');
+            const deleteBtn = document.getElementById('btnDeletePlaylist');
+
+            if (currentPlaylistView === 'all') {
+                titleEl.innerText = "All Tracks";
+                deleteBtn.style.display = 'none';
+            } else if (currentPlaylistView === 'liked') {
+                titleEl.innerText = "❤️ Liked Songs";
+                deleteBtn.style.display = 'none';
+            } else {
+                titleEl.innerText = `📁 ${currentPlaylistView}`;
+                deleteBtn.style.display = 'inline-flex';
+            }
+
+            countEl.innerText = `${tracks.length} track${tracks.length === 1 ? '' : 's'}`;
+            renderMusicList(tracks);
+        }
+
+        function playCurrentPlaylist(shuffle = false) {
+            const tracks = getCurrentViewTracks();
+            if (!tracks || tracks.length === 0) {
+                alert("This view has no songs to play.");
                 return;
             }
-            listEl.innerHTML = items.map((item, idx) => `
-                <div class="file-row">
-                    <div class="file-info" onclick="playMusicAtIndex(${idx})">
-                        <div class="file-icon">🎵</div>
-                        <div class="file-name-block">
-                            <div class="file-title">${escapeHtml(item.name)}</div>
-                            <div class="file-subtitle">${formatBytes(item.size)} &bull; ${escapeHtml(item.shareName)}</div>
+
+            if (shuffle) {
+                isShuffleMode = true;
+                const shuffled = [...tracks].sort(() => Math.random() - 0.5);
+                musicQueue = shuffled;
+            } else {
+                musicQueue = [...tracks];
+            }
+
+            const shuffleBtn = document.getElementById('btnMusicShuffle');
+            shuffleBtn.classList.toggle('active', isShuffleMode);
+
+            playMusicAtIndex(0);
+        }
+
+        function deleteCurrentPlaylist() {
+            if (currentPlaylistView === 'all' || currentPlaylistView === 'liked') return;
+            if (confirm(`Delete the playlist "${currentPlaylistView}"?`)) {
+                delete playlists[currentPlaylistView];
+                savePlaylists();
+                selectPlaylistView('all');
+            }
+        }
+
+        function openNewPlaylistModal() {
+            document.getElementById('newPlaylistInput').value = '';
+            document.getElementById('newPlaylistModal').style.display = 'flex';
+            setTimeout(() => document.getElementById('newPlaylistInput').focus(), 50);
+        }
+
+        function closeNewPlaylistModal() {
+            document.getElementById('newPlaylistModal').style.display = 'none';
+        }
+
+        function createNewPlaylist() {
+            const name = document.getElementById('newPlaylistInput').value.trim();
+            if (!name) {
+                alert("Please enter a playlist name.");
+                return;
+            }
+            if (name.toLowerCase() === 'all' || name.toLowerCase() === 'liked' || playlists[name]) {
+                alert("A playlist with that name already exists.");
+                return;
+            }
+            playlists[name] = [];
+            savePlaylists();
+            closeNewPlaylistModal();
+            selectPlaylistView(name);
+        }
+
+        function openAddToPlaylistModal(track, event) {
+            if (event) event.stopPropagation();
+            selectedTrackForPlaylist = track;
+            document.getElementById('addToPlaylistTrackTitle').innerText = `Add: ${track.name}`;
+            document.getElementById('quickNewPlaylistInput').value = '';
+
+            const listEl = document.getElementById('playlistChoicesList');
+            const customNames = Object.keys(playlists);
+
+            if (customNames.length === 0) {
+                listEl.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85rem; padding: 10px 0;">No custom playlists created yet. Create one below!</div>`;
+            } else {
+                listEl.innerHTML = customNames.map(name => {
+                    const alreadyIn = (playlists[name] || []).some(t => t.fileId === track.fileId);
+                    return `
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: var(--surface-card); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                            <div>
+                                <div style="font-weight: 600; font-size: 0.85rem;">📁 ${escapeHtml(name)}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">${(playlists[name] || []).length} tracks</div>
+                            </div>
+                            <button class="btn-action" style="${alreadyIn ? 'opacity: 0.6;' : ''}" onclick="toggleTrackInPlaylist('${escapeHtml(name)}')">
+                                ${alreadyIn ? '✓ Added' : '+ Add'}
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('addToPlaylistModal').style.display = 'flex';
+        }
+
+        function closeAddToPlaylistModal() {
+            document.getElementById('addToPlaylistModal').style.display = 'none';
+            selectedTrackForPlaylist = null;
+        }
+
+        function toggleTrackInPlaylist(playlistName) {
+            if (!selectedTrackForPlaylist || !playlists[playlistName]) return;
+            const idx = playlists[playlistName].findIndex(t => t.fileId === selectedTrackForPlaylist.fileId);
+            if (idx >= 0) {
+                playlists[playlistName].splice(idx, 1);
+                showToast(`Removed from "${playlistName}"`);
+            } else {
+                playlists[playlistName].push(selectedTrackForPlaylist);
+                showToast(`Added to "${playlistName}"`);
+            }
+            savePlaylists();
+            renderPlaylistPills();
+            openAddToPlaylistModal(selectedTrackForPlaylist);
+            if (currentPlaylistView === playlistName) {
+                renderCurrentMusicView();
+            }
+        }
+
+        function removeTrackFromPlaylist(playlistName, fileId, event) {
+            if (event) event.stopPropagation();
+            if (!playlists[playlistName]) return;
+            playlists[playlistName] = playlists[playlistName].filter(t => t.fileId !== fileId);
+            savePlaylists();
+            renderPlaylistPills();
+            renderCurrentMusicView();
+        }
+
+        function quickCreateAndAdd() {
+            const name = document.getElementById('quickNewPlaylistInput').value.trim();
+            if (!name) return;
+            if (!playlists[name]) {
+                playlists[name] = [];
+            }
+            if (selectedTrackForPlaylist && !playlists[name].some(t => t.fileId === selectedTrackForPlaylist.fileId)) {
+                playlists[name].push(selectedTrackForPlaylist);
+            }
+            savePlaylists();
+            renderPlaylistPills();
+            closeAddToPlaylistModal();
+            selectPlaylistView(name);
+        }
+
+        // Render Music Track List
+        function renderMusicList(items) {
+            const listEl = document.getElementById('musicTrackList');
+            if (!items || items.length === 0) {
+                let emptyMsg = 'No audio tracks found.';
+                if (currentPlaylistView === 'liked') {
+                    emptyMsg = 'No liked songs yet. Click the ❤️ on any audio track to add it to your Liked Songs!';
+                } else if (currentPlaylistView !== 'all') {
+                    emptyMsg = `Playlist "${currentPlaylistView}" is empty. Click "+ Playlist" on any song to add tracks here.`;
+                }
+                listEl.innerHTML = `<div class="empty-state"><div class="empty-icon">🎵</div><div>${emptyMsg}</div></div>`;
+                return;
+            }
+
+            const isCustomPlaylist = (currentPlaylistView !== 'all' && currentPlaylistView !== 'liked');
+
+            listEl.innerHTML = items.map((item, idx) => {
+                const liked = isSongLiked(item.fileId);
+                return `
+                    <div class="file-row">
+                        <div class="file-info" onclick="playCurrentViewTrack(${idx})">
+                            <button class="btn-like ${liked ? 'liked' : ''}" data-fileid="${item.fileId}" title="${liked ? 'Unlike' : 'Like'}" onclick="toggleLikeSong(${escapeJson(item)}, event)">
+                                ${liked ? '❤️' : '🤍'}
+                            </button>
+                            <div class="file-name-block">
+                                <div class="file-title">${escapeHtml(item.name)}</div>
+                                <div class="file-subtitle">${formatBytes(item.size)} &bull; ${escapeHtml(item.shareName || '')}</div>
+                            </div>
+                        </div>
+                        <div class="file-actions">
+                            <button class="btn-action" title="Add to playlist" onclick="openAddToPlaylistModal(${escapeJson(item)}, event)">+ Playlist</button>
+                            ${isCustomPlaylist ? `<button class="btn-action" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.3);" title="Remove from playlist" onclick="removeTrackFromPlaylist('${escapeHtml(currentPlaylistView)}', '${item.fileId}', event)">✕</button>` : ''}
+                            <button class="btn-action" onclick="playCurrentViewTrack(${idx})">▶ Play</button>
+                            <a class="btn-action" href="${item.downloadUrl}" download="${escapeHtml(item.name)}">⬇</a>
                         </div>
                     </div>
-                    <div class="file-actions">
-                        <button class="btn-action" onclick="playMusicAtIndex(${idx})">▶ Play</button>
-                        <a class="btn-action" href="${item.downloadUrl}" download="${escapeHtml(item.name)}">⬇</a>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+        }
+
+        function playCurrentViewTrack(idx) {
+            const tracks = getCurrentViewTracks();
+            musicQueue = [...tracks];
+            playMusicAtIndex(idx);
         }
 
         function renderPhotosGrid(items) {
@@ -1158,6 +1654,7 @@
             const savedPosition = localStorage.getItem('video_pos_' + item.fileId);
             if (savedPosition && parseFloat(savedPosition) > 5) {
                 videoElement.currentTime = parseFloat(savedPosition);
+                showVideoToast(`Resumed at ${formatTime(parseFloat(savedPosition))}`);
             }
             videoElement.play().catch(e => console.log('Autoplay handled', e));
         }
@@ -1177,6 +1674,7 @@
 
         function setVideoSpeed(speed) {
             videoElement.playbackRate = speed;
+            showVideoToast(`Speed: ${speed}x`);
         }
 
         function closeVideoModal() {
@@ -1192,8 +1690,13 @@
             const track = musicQueue[idx];
 
             document.getElementById('musicBarTitle').innerText = track.name;
-            document.getElementById('musicBarSub').innerText = `${track.shareName} (${idx + 1}/${musicQueue.length})`;
+            document.getElementById('musicBarSub').innerText = `${track.shareName || 'Media'} (${idx + 1}/${musicQueue.length})`;
             document.getElementById('musicBar').style.display = 'flex';
+
+            const liked = isSongLiked(track.fileId);
+            const likeBtn = document.getElementById('musicBarLikeBtn');
+            likeBtn.innerText = liked ? '❤️' : '🤍';
+            likeBtn.classList.toggle('liked', liked);
 
             audioElement.src = track.streamUrl;
             audioElement.play().catch(e => console.log('Audio play error', e));
@@ -1224,22 +1727,82 @@
         }
 
         function toggleMusicPlay() {
+            if (!audioElement.src) {
+                if (musicQueue.length > 0) {
+                    playMusicAtIndex(0);
+                }
+                return;
+            }
             if (audioElement.paused) {
                 audioElement.play();
+                showToast("▶ Audio Play");
             } else {
                 audioElement.pause();
+                showToast("⏸ Audio Pause");
+            }
+        }
+
+        function toggleShuffleMode() {
+            isShuffleMode = !isShuffleMode;
+            const btn = document.getElementById('btnMusicShuffle');
+            btn.classList.toggle('active', isShuffleMode);
+            btn.title = isShuffleMode ? "Shuffle: ON (S)" : "Shuffle: OFF (S)";
+            showToast(isShuffleMode ? "🔀 Shuffle ON" : "➡️ Shuffle OFF");
+        }
+
+        function toggleRepeatMode() {
+            isRepeatMode = (isRepeatMode + 1) % 3;
+            const btn = document.getElementById('btnMusicRepeat');
+            if (isRepeatMode === 0) {
+                btn.innerText = '🔁';
+                btn.classList.remove('active');
+                btn.title = 'Repeat: OFF';
+                showToast("➡️ Repeat OFF");
+            } else if (isRepeatMode === 1) {
+                btn.innerText = '🔁';
+                btn.classList.add('active');
+                btn.title = 'Repeat: ALL';
+                showToast("🔁 Repeat ALL");
+            } else {
+                btn.innerText = '🔂';
+                btn.classList.add('active');
+                btn.title = 'Repeat: ONE';
+                showToast("🔂 Repeat ONE");
             }
         }
 
         function playNextMusic() {
+            if (musicQueue.length === 0) return;
+            if (isRepeatMode === 2) {
+                audioElement.currentTime = 0;
+                audioElement.play();
+                return;
+            }
+            if (isShuffleMode && musicQueue.length > 1) {
+                let nextIdx = Math.floor(Math.random() * musicQueue.length);
+                if (nextIdx === currentMusicIndex) {
+                    nextIdx = (nextIdx + 1) % musicQueue.length;
+                }
+                playMusicAtIndex(nextIdx);
+                return;
+            }
             if (currentMusicIndex + 1 < musicQueue.length) {
                 playMusicAtIndex(currentMusicIndex + 1);
+            } else if (isRepeatMode === 1) {
+                playMusicAtIndex(0);
             }
         }
 
         function playPrevMusic() {
+            if (musicQueue.length === 0) return;
+            if (audioElement.currentTime > 3) {
+                audioElement.currentTime = 0;
+                return;
+            }
             if (currentMusicIndex - 1 >= 0) {
                 playMusicAtIndex(currentMusicIndex - 1);
+            } else if (musicQueue.length > 0) {
+                playMusicAtIndex(musicQueue.length - 1);
             }
         }
 
@@ -1252,6 +1815,139 @@
 
         function setMusicVolume() {
             audioElement.volume = document.getElementById('musicVolumeSlider').value;
+        }
+
+        // Desktop Keyboard Controls & Toast
+        function setupKeyboardControls() {
+            window.addEventListener('keydown', (e) => {
+                const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+                if (activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select') {
+                    if (e.key === 'Escape') document.activeElement.blur();
+                    return;
+                }
+
+                const isVideoModalOpen = document.getElementById('videoModal').style.display === 'flex';
+                const isPhotoModalOpen = document.getElementById('photoModal').style.display === 'flex';
+                const isNewPlaylistOpen = document.getElementById('newPlaylistModal').style.display === 'flex';
+                const isAddToPlaylistOpen = document.getElementById('addToPlaylistModal').style.display === 'flex';
+                const isConnectOpen = document.getElementById('connectModal').style.display === 'flex';
+
+                if (isNewPlaylistOpen || isAddToPlaylistOpen || isConnectOpen) {
+                    if (e.key === 'Escape') {
+                        closeNewPlaylistModal();
+                        closeAddToPlaylistModal();
+                        closeConnectModal();
+                    }
+                    return;
+                }
+
+                if (isVideoModalOpen) {
+                    if (e.code === 'Space' || e.key === ' ') {
+                        e.preventDefault();
+                        if (videoElement.paused) {
+                            videoElement.play();
+                            showVideoToast('▶ Play');
+                        } else {
+                            videoElement.pause();
+                            showVideoToast('⏸ Pause');
+                        }
+                    } else if (e.key === 'ArrowLeft') {
+                        e.preventDefault();
+                        videoElement.currentTime = Math.max(0, videoElement.currentTime - 5);
+                        showVideoToast('⏪ -5s (' + formatTime(videoElement.currentTime) + ')');
+                    } else if (e.key === 'ArrowRight') {
+                        e.preventDefault();
+                        videoElement.currentTime = Math.min(videoElement.duration || 999999, videoElement.currentTime + 5);
+                        showVideoToast('⏩ +5s (' + formatTime(videoElement.currentTime) + ')');
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        videoElement.volume = Math.min(1, Math.round((videoElement.volume + 0.05) * 100) / 100);
+                        showVideoToast('🔊 Vol ' + Math.round(videoElement.volume * 100) + '%');
+                    } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        videoElement.volume = Math.max(0, Math.round((videoElement.volume - 0.05) * 100) / 100);
+                        showVideoToast('🔉 Vol ' + Math.round(videoElement.volume * 100) + '%');
+                    } else if (e.key === 'f' || e.key === 'F') {
+                        e.preventDefault();
+                        if (!document.fullscreenElement) {
+                            if (videoElement.requestFullscreen) videoElement.requestFullscreen();
+                            else if (videoElement.webkitRequestFullscreen) videoElement.webkitRequestFullscreen();
+                        } else {
+                            if (document.exitFullscreen) document.exitFullscreen();
+                        }
+                    } else if (e.key === 'm' || e.key === 'M') {
+                        e.preventDefault();
+                        videoElement.muted = !videoElement.muted;
+                        showVideoToast(videoElement.muted ? '🔇 Muted' : '🔊 Unmuted');
+                    } else if (e.key === 'Escape') {
+                        closeVideoModal();
+                    }
+                } else if (isPhotoModalOpen) {
+                    if (e.key === 'ArrowLeft') {
+                        e.preventDefault();
+                        prevPhoto();
+                    } else if (e.key === 'ArrowRight') {
+                        e.preventDefault();
+                        nextPhoto();
+                    } else if (e.key === 'Escape') {
+                        closePhotoModal();
+                    }
+                } else {
+                    // Global desktop audio shortcuts when not in video or photo modal
+                    if (e.code === 'Space' || e.key === ' ') {
+                        if (audioElement.src) {
+                            e.preventDefault();
+                            toggleMusicPlay();
+                        }
+                    } else if (e.key === 'ArrowLeft') {
+                        if (audioElement.src && !isNaN(audioElement.duration)) {
+                            e.preventDefault();
+                            audioElement.currentTime = Math.max(0, audioElement.currentTime - 5);
+                            showToast('⏪ -5s');
+                        }
+                    } else if (e.key === 'ArrowRight') {
+                        if (audioElement.src && !isNaN(audioElement.duration)) {
+                            e.preventDefault();
+                            audioElement.currentTime = Math.min(audioElement.duration, audioElement.currentTime + 5);
+                            showToast('⏩ +5s');
+                        }
+                    } else if (e.key === 's' || e.key === 'S') {
+                        if (currentTab === 'music' || audioElement.src) {
+                            toggleShuffleMode();
+                        }
+                    }
+                }
+            });
+        }
+
+        function showVideoToast(msg) {
+            const toast = document.getElementById('videoToast');
+            if (!toast) return;
+            toast.innerText = msg;
+            toast.style.opacity = '1';
+            if (videoToastTimeout) clearTimeout(videoToastTimeout);
+            videoToastTimeout = setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 1000);
+        }
+
+        function showToast(msg) {
+            let toast = document.getElementById('globalToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'globalToast';
+                toast.className = 'video-toast';
+                toast.style.position = 'fixed';
+                toast.style.bottom = '95px';
+                toast.style.top = 'auto';
+                toast.style.zIndex = '300';
+                document.body.appendChild(toast);
+            }
+            toast.innerText = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 1200);
         }
 
         // Photo Lightbox & Slideshow
@@ -1310,7 +2006,8 @@
                 const filtered = videoItems.filter(i => i.name.toLowerCase().includes(query));
                 renderVideosGrid(filtered);
             } else if (currentTab === 'music') {
-                const filtered = musicItems.filter(i => i.name.toLowerCase().includes(query));
+                const currentTracks = getCurrentViewTracks();
+                const filtered = currentTracks.filter(i => i.name.toLowerCase().includes(query));
                 renderMusicList(filtered);
             } else if (currentTab === 'photos') {
                 const filtered = photoItems.filter(i => i.name.toLowerCase().includes(query));
@@ -1339,7 +2036,8 @@
                 videoItems.sort(sorter);
                 handleSearch();
             } else if (currentTab === 'music') {
-                musicItems.sort(sorter);
+                const currentTracks = getCurrentViewTracks();
+                currentTracks.sort(sorter);
                 handleSearch();
             } else if (currentTab === 'photos') {
                 photoItems.sort(sorter);
@@ -1375,7 +2073,6 @@
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, size, size);
 
-            // Generate deterministic QR matrix representation
             const matrixSize = 25;
             const moduleSize = size / matrixSize;
 
@@ -1393,7 +2090,6 @@
             drawFinder(matrixSize - 8, 1);
             drawFinder(1, matrixSize - 8);
 
-            // Pattern data hash for visual validation
             let hash = 0;
             for (let i = 0; i < text.length; i++) {
                 hash = ((hash << 5) - hash) + text.charCodeAt(i);
@@ -1402,7 +2098,6 @@
 
             for (let r = 0; r < matrixSize; r++) {
                 for (let c = 0; c < matrixSize; c++) {
-                    // Avoid finder patterns
                     if ((r < 9 && c < 9) || (r < 9 && c >= matrixSize - 9) || (r >= matrixSize - 9 && c < 9)) {
                         continue;
                     }
