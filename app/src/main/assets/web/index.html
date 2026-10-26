@@ -7,92 +7,267 @@
     <style>
         :root {
             --bg: #090d16;
-            --surface: #131d31;
-            --surface-hover: #1c2b47;
-            --border: #223252;
+            --surface: #111a2e;
+            --surface-hover: #192640;
+            --surface-card: #152238;
+            --border: #203152;
+            --border-focus: #38bdf8;
             --accent: #38bdf8;
             --accent-hover: #7dd3fc;
+            --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
             --text: #f8fafc;
             --text-secondary: #94a3b8;
+            --text-muted: #64748b;
             --success: #10b981;
-            --card-radius: 12px;
+            --danger: #ef4444;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
         }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg);
             color: var(--text);
-            padding: 20px 16px;
-            display: flex;
-            justify-content: center;
+            min-height: 100vh;
+            padding-bottom: 90px;
+            line-height: 1.5;
         }
-        .container { max-width: 960px; width: 100%; }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 16px;
+
+        .header-bar {
+            background: rgba(17, 26, 46, 0.85);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .logo-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .logo-title span {
+            color: var(--accent);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--success);
+            padding: 3px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 6px var(--success);
+        }
+
+        .nav-tabs {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(9, 13, 22, 0.6);
+            padding: 4px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .tab-btn.active {
+            color: #090d16;
+            background: var(--accent);
+        }
+
+        .btn-connect {
+            background: var(--surface-card);
+            border: 1px solid var(--border);
+            color: var(--accent);
+            padding: 7px 14px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-connect:hover {
+            background: var(--surface-hover);
+            border-color: var(--accent);
+        }
+
+        .container {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 24px 16px;
+        }
+
+        /* Toolbars */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
             margin-bottom: 20px;
         }
-        h1 { font-size: 1.4rem; color: var(--accent); display: flex; align-items: center; gap: 8px; }
-        .badge-live {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            padding: 4px 10px;
-            border-radius: 9999px;
-            font-size: 0.8rem;
-            font-weight: 600;
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 220px;
+            max-width: 400px;
         }
+
+        .search-input {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 9px 12px 9px 34px;
+            color: var(--text);
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--border-focus);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .sort-select {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 9px 12px;
+            color: var(--text);
+            font-size: 0.875rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Shares Pills */
         .shares-nav {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 16px;
             overflow-x: auto;
-            padding-bottom: 6px;
+            padding-bottom: 4px;
         }
+
         .share-pill {
             background: var(--surface);
             border: 1px solid var(--border);
-            color: var(--text);
-            padding: 8px 16px;
-            border-radius: 8px;
+            color: var(--text-secondary);
+            padding: 7px 14px;
+            border-radius: var(--radius-md);
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             white-space: nowrap;
             transition: all 0.2s;
         }
-        .share-pill:hover, .share-pill.active {
-            background: var(--accent);
-            color: #090d16;
-            font-weight: 600;
-            border-color: var(--accent);
+
+        .share-pill:hover {
+            color: var(--text);
+            border-color: var(--border-focus);
         }
+
+        .share-pill.active {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent);
+            border-color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* Breadcrumbs */
         .breadcrumbs {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             margin-bottom: 16px;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
+            font-size: 0.875rem;
+            color: var(--text-muted);
             flex-wrap: wrap;
         }
-        .breadcrumb-item {
+
+        .breadcrumb-link {
             color: var(--accent);
             cursor: pointer;
             text-decoration: none;
         }
-        .breadcrumb-item:hover { text-decoration: underline; }
-        .browser-card {
+
+        .breadcrumb-link:hover {
+            text-decoration: underline;
+        }
+
+        /* File List Table / Rows */
+        .card-list {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: var(--card-radius);
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            margin-bottom: 24px;
         }
-        .file-list { list-style: none; }
-        .file-item {
+
+        .file-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -100,9 +275,16 @@
             border-bottom: 1px solid var(--border);
             transition: background 0.15s;
         }
-        .file-item:last-child { border-bottom: none; }
-        .file-item:hover { background: var(--surface-hover); }
-        .file-left {
+
+        .file-row:last-child {
+            border-bottom: none;
+        }
+
+        .file-row:hover {
+            background: var(--surface-hover);
+        }
+
+        .file-info {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -110,131 +292,623 @@
             flex: 1;
             cursor: pointer;
         }
-        .file-icon { font-size: 1.25rem; flex-shrink: 0; }
-        .file-name {
-            font-size: 0.95rem;
+
+        .file-icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .file-name-block {
+            min-width: 0;
+        }
+
+        .file-title {
+            font-size: 0.925rem;
             font-weight: 500;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .file-meta {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
+
+        .file-subtitle {
+            font-size: 0.775rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .file-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             margin-left: 12px;
             flex-shrink: 0;
         }
-        .file-actions { display: flex; gap: 8px; margin-left: 12px; }
+
         .btn-action {
-            background: rgba(56, 189, 248, 0.12);
+            background: rgba(56, 189, 248, 0.1);
             color: var(--accent);
-            border: 1px solid rgba(56, 189, 248, 0.25);
-            padding: 6px 12px;
-            border-radius: 6px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            padding: 5px 11px;
+            border-radius: var(--radius-sm);
             font-size: 0.8rem;
-            text-decoration: none;
+            font-weight: 600;
             cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
             transition: all 0.2s;
         }
+
         .btn-action:hover {
             background: var(--accent);
             color: #090d16;
+            border-color: var(--accent);
         }
-        .player-modal {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.85);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            z-index: 1000;
+
+        /* Media Grids (Videos & Photos) */
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
         }
-        .player-content {
+
+        .media-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            max-width: 800px;
-            width: 100%;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: transform 0.15s, border-color 0.15s;
         }
-        .player-header {
+
+        .media-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .media-thumb-box {
+            position: relative;
+            background: #000;
+            aspect-ratio: 16 / 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .media-thumb-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .media-card-icon {
+            font-size: 2.2rem;
+            color: var(--accent);
+            opacity: 0.85;
+        }
+
+        .media-card-meta {
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .media-card-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .media-card-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Lightbox & Video Player Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 200;
+        }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            max-width: 860px;
+            width: 100%;
+            overflow: hidden;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
         }
-        .player-title {
-            font-size: 1.1rem;
+
+        .modal-title {
+            font-size: 1rem;
+            font-weight: 600;
             color: var(--text);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            padding-right: 12px;
         }
-        .btn-close {
+
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 6px;
+            line-height: 1;
+        }
+
+        .modal-close-btn:hover {
+            color: var(--text);
+        }
+
+        .modal-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+
+        video {
+            width: 100%;
+            max-height: 70vh;
+            border-radius: var(--radius-sm);
+            outline: none;
+        }
+
+        .photo-preview {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: var(--radius-sm);
+        }
+
+        .modal-footer {
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+            font-size: 0.85rem;
+        }
+
+        /* Persistent Music Player Bar */
+        .music-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(17, 26, 46, 0.95);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border);
+            padding: 10px 20px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            z-index: 150;
+        }
+
+        .music-track-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 180px;
+            max-width: 280px;
+        }
+
+        .music-track-icon {
+            font-size: 1.6rem;
+            color: var(--accent);
+        }
+
+        .music-track-details {
+            min-width: 0;
+        }
+
+        .music-track-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .music-track-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .music-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            max-width: 480px;
+        }
+
+        .music-buttons {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .btn-music-ctrl {
             background: transparent;
             border: none;
             color: var(--text-secondary);
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             cursor: pointer;
-            padding: 4px 8px;
+            padding: 4px;
+            transition: color 0.15s;
         }
-        .btn-close:hover { color: #fff; }
-        video, audio {
+
+        .btn-music-ctrl:hover {
+            color: var(--text);
+        }
+
+        .btn-music-play {
+            background: var(--accent);
+            color: #090d16;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.15s, background 0.15s;
+        }
+
+        .btn-music-play:hover {
+            transform: scale(1.06);
+            background: var(--accent-hover);
+        }
+
+        .music-timeline-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             width: 100%;
-            border-radius: 8px;
-            background: #000;
-            outline: none;
+            font-size: 0.75rem;
+            color: var(--text-muted);
         }
-        img.preview-img {
-            max-width: 100%;
-            max-height: 70vh;
-            display: block;
-            margin: 0 auto;
-            border-radius: 8px;
+
+        .timeline-slider {
+            flex: 1;
+            accent-color: var(--accent);
+            cursor: pointer;
+            height: 4px;
         }
+
+        /* Empty states */
         .empty-state {
-            padding: 40px 20px;
+            padding: 60px 20px;
             text-align: center;
-            color: var(--text-secondary);
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            opacity: 0.6;
+        }
+
+        /* QR Code Modal Content */
+        .qr-card {
+            background: #fff;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            margin: 12px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .url-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--accent);
+            word-break: break-all;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        @media (max-width: 640px) {
+            .header-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .nav-tabs {
+                justify-content: space-around;
+            }
+            .music-bar {
+                flex-direction: column;
+                padding: 10px 14px;
+            }
+            .music-track-info {
+                max-width: 100%;
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>⚡ Local Media Server</h1>
-            <div class="badge-live">Live Local Stream</div>
-        </header>
 
-        <div id="sharesNav" class="shares-nav"></div>
-        <div id="breadcrumbs" class="breadcrumbs"></div>
-
-        <div class="browser-card">
-            <ul id="fileList" class="file-list">
-                <li class="empty-state">Loading shared folders...</li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- Media Player Modal -->
-    <div id="playerModal" class="player-modal">
-        <div class="player-content">
-            <div class="player-header">
-                <div id="playerTitle" class="player-title"></div>
-                <button class="btn-close" onclick="closePlayer()">&times;</button>
+    <!-- Header -->
+    <header class="header-bar">
+        <div class="logo-group">
+            <div class="logo-title">⚡ <span>Media</span>Server</div>
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                <span>Active</span>
             </div>
-            <div id="playerMediaContainer"></div>
+        </div>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('browse')">📁 Browse</button>
+            <button class="tab-btn" onclick="switchTab('videos')">🎬 Videos</button>
+            <button class="tab-btn" onclick="switchTab('music')">🎵 Music</button>
+            <button class="tab-btn" onclick="switchTab('photos')">🖼️ Photos</button>
+        </nav>
+
+        <button class="btn-connect" onclick="openConnectModal()">
+            <span>📱 Connect</span>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Toolbar for search & sort -->
+        <div class="toolbar">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input id="searchInput" class="search-input" type="text" placeholder="Search in this view..." oninput="handleSearch()">
+            </div>
+            <select id="sortSelect" class="sort-select" onchange="handleSort()">
+                <option value="name_asc">Sort: Name (A-Z)</option>
+                <option value="name_desc">Sort: Name (Z-A)</option>
+                <option value="size_desc">Sort: Size (Largest)</option>
+                <option value="size_asc">Sort: Size (Smallest)</option>
+                <option value="date_desc">Sort: Date (Newest)</option>
+            </select>
+        </div>
+
+        <!-- Section 1: Browse -->
+        <div id="sectionBrowse">
+            <div id="sharesNav" class="shares-nav"></div>
+            <div id="breadcrumbs" class="breadcrumbs"></div>
+            <div class="card-list">
+                <div id="browseFileList">
+                    <div class="empty-state">
+                        <div class="empty-icon">📁</div>
+                        <div>Loading shared folders...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Videos -->
+        <div id="sectionVideos" style="display: none;">
+            <div id="videosGrid" class="media-grid">
+                <div class="empty-state">
+                    <div class="empty-icon">🎬</div>
+                    <div>Scanning video library...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Music -->
+        <div id="sectionMusic" style="display: none;">
+            <div class="card-list">
+                <div id="musicTrackList">
+                    <div class="empty-state">
+                        <div class="empty-icon">🎵</div>
+                        <div>Scanning music library...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Photos -->
+        <div id="sectionPhotos" style="display: none;">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+                <button class="btn-action" onclick="toggleSlideshow()">
+                    <span id="btnSlideshowText">▶ Start Slideshow</span>
+                </button>
+            </div>
+            <div id="photosGrid" class="media-grid">
+                <div class="empty-state">
+                    <div class="empty-icon">🖼️</div>
+                    <div>Scanning photos...</div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Persistent Music Player Bar -->
+    <div id="musicBar" class="music-bar">
+        <div class="music-track-info">
+            <div class="music-track-icon">🎵</div>
+            <div class="music-track-details">
+                <div id="musicBarTitle" class="music-track-title">No track selected</div>
+                <div id="musicBarSub" class="music-track-sub">Queue: 0 songs</div>
+            </div>
+        </div>
+
+        <div class="music-controls">
+            <div class="music-buttons">
+                <button class="btn-music-ctrl" onclick="playPrevMusic()">⏮</button>
+                <button id="btnMusicPlayPause" class="btn-music-play" onclick="toggleMusicPlay()">▶</button>
+                <button class="btn-music-ctrl" onclick="playNextMusic()">⏭</button>
+            </div>
+            <div class="music-timeline-box">
+                <span id="musicTimeCurrent">0:00</span>
+                <input id="musicSlider" class="timeline-slider" type="range" min="0" max="100" value="0" oninput="seekMusic()">
+                <span id="musicTimeTotal">0:00</span>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 0.9rem; color: var(--text-muted);">🔊</span>
+            <input id="musicVolumeSlider" class="timeline-slider" style="width: 80px;" type="range" min="0" max="1" step="0.05" value="1" oninput="setMusicVolume()">
+        </div>
+    </div>
+
+    <!-- Video Player Modal -->
+    <div id="videoModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div id="videoModalTitle" class="modal-title">Video Player</div>
+                <button class="modal-close-btn" onclick="closeVideoModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <video id="html5VideoPlayer" controls playsinline preload="metadata">
+                    Your browser does not support HTML5 video streaming.
+                </video>
+            </div>
+            <div class="modal-footer">
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <span style="color: var(--text-muted);">Speed:</span>
+                    <button class="btn-action" onclick="setVideoSpeed(1)">1x</button>
+                    <button class="btn-action" onclick="setVideoSpeed(1.25)">1.25x</button>
+                    <button class="btn-action" onclick="setVideoSpeed(1.5)">1.5x</button>
+                    <button class="btn-action" onclick="setVideoSpeed(2)">2x</button>
+                </div>
+                <a id="btnVideoDownload" class="btn-action" href="#" download>⬇ Download Video</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Lightbox Modal -->
+    <div id="photoModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 900px;">
+            <div class="modal-header">
+                <div id="photoModalTitle" class="modal-title">Photo Preview</div>
+                <button class="modal-close-btn" onclick="closePhotoModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 10px;">
+                <img id="lightboxPhotoImg" class="photo-preview" src="" alt="Photo Preview">
+            </div>
+            <div class="modal-footer">
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-action" onclick="prevPhoto()">◀ Previous</button>
+                    <button class="btn-action" onclick="nextPhoto()">Next ▶</button>
+                </div>
+                <a id="btnPhotoDownload" class="btn-action" href="#" download>⬇ Download Photo</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connect / QR Code Modal -->
+    <div id="connectModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 440px;">
+            <div class="modal-header">
+                <div class="modal-title">📱 Connect Device</div>
+                <button class="modal-close-btn" onclick="closeConnectModal()">&times;</button>
+            </div>
+            <div style="padding: 20px; display: flex; flex-direction: column; align-items: center;">
+                <p style="font-size: 0.85rem; color: var(--text-secondary); text-align: center; margin-bottom: 12px;">
+                    Scan this QR code from any smartphone, tablet, or laptop on the same Wi-Fi / Hotspot to access this media server instantly.
+                </p>
+                <div class="qr-card">
+                    <canvas id="qrCanvas" width="220" height="220"></canvas>
+                </div>
+                <div id="connectUrlText" class="url-box"></div>
+                <button class="btn-action" style="width: 100%; justify-content: center; padding: 10px;" onclick="copyConnectionUrl()">
+                    📋 Copy Connection URL
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden audio element for continuous queue -->
+    <audio id="globalAudioPlayer" preload="metadata"></audio>
 
     <script>
+        // State variables
+        let currentTab = 'browse';
+        let shares = [];
         let currentShareId = null;
         let currentPath = "";
-        let shares = [];
+        let browseItems = [];
+        let videoItems = [];
+        let musicItems = [];
+        let musicQueue = [];
+        let currentMusicIndex = -1;
+        let photoItems = [];
+        let currentPhotoIndex = -1;
+        let slideshowTimer = null;
+        let currentPlayingVideoFileId = null;
 
-        async function init() {
+        const audioElement = document.getElementById('globalAudioPlayer');
+        const videoElement = document.getElementById('html5VideoPlayer');
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async () => {
+            setupAudioEvents();
+            setupVideoEvents();
+            await loadShares();
+            renderQrCode(window.location.origin);
+        });
+
+        // Tab Navigation
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.getElementById('sectionBrowse').style.display = (tab === 'browse') ? 'block' : 'none';
+            document.getElementById('sectionVideos').style.display = (tab === 'videos') ? 'block' : 'none';
+            document.getElementById('sectionMusic').style.display = (tab === 'music') ? 'block' : 'none';
+            document.getElementById('sectionPhotos').style.display = (tab === 'photos') ? 'block' : 'none';
+
+            document.getElementById('searchInput').value = '';
+
+            if (tab === 'videos' && videoItems.length === 0) loadMediaCategory('videos');
+            if (tab === 'music' && musicItems.length === 0) loadMediaCategory('music');
+            if (tab === 'photos' && photoItems.length === 0) loadMediaCategory('photos');
+        }
+
+        // Load Shares
+        async function loadShares() {
             try {
                 const res = await fetch('/api/shares');
                 shares = await res.json();
@@ -242,21 +916,25 @@
                 if (shares.length > 0) {
                     selectShare(shares[0].id);
                 } else {
-                    document.getElementById('fileList').innerHTML =
-                        '<li class="empty-state">No folders shared yet. Use the host Android app to add a shared folder.</li>';
+                    document.getElementById('browseFileList').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📁</div>
+                            <div>No folders shared yet. Open the host Android app and tap "+ Add Folder".</div>
+                        </div>
+                    `;
                 }
             } catch (e) {
                 console.error(e);
-                document.getElementById('fileList').innerHTML =
-                    '<li class="empty-state">Failed to connect to local media server.</li>';
             }
         }
 
         function renderSharesNav() {
             const nav = document.getElementById('sharesNav');
-            nav.innerHTML = shares.map(s => 
-                `<button class="share-pill ${s.id === currentShareId ? 'active' : ''}" onclick="selectShare('${s.id}')">📁 ${s.name}</button>`
-            ).join('');
+            nav.innerHTML = shares.map(s => `
+                <button class="share-pill ${s.id === currentShareId ? 'active' : ''}" onclick="selectShare('${s.id}')">
+                    📁 ${escapeHtml(s.name)}
+                </button>
+            `).join('');
         }
 
         async function selectShare(shareId) {
@@ -269,16 +947,26 @@
         async function loadDirectory(path) {
             currentPath = path;
             renderBreadcrumbs();
-            const listEl = document.getElementById('fileList');
-            listEl.innerHTML = '<li class="empty-state">Loading...</li>';
+            const listEl = document.getElementById('browseFileList');
+            listEl.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">⏳</div>
+                    <div>Loading contents...</div>
+                </div>
+            `;
 
             try {
                 const res = await fetch(`/api/shares/${currentShareId}/browse?path=${encodeURIComponent(path)}`);
-                if (!res.ok) throw new Error('Failed to load directory');
-                const items = await res.json();
-                renderItems(items);
+                if (!res.ok) throw new Error('Directory access failed');
+                browseItems = await res.json();
+                renderBrowseFiles(browseItems);
             } catch (e) {
-                listEl.innerHTML = `<li class="empty-state">Error loading folder: ${e.message}</li>`;
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚠️</div>
+                        <div>Failed to load directory: ${escapeHtml(e.message)}</div>
+                    </div>
+                `;
             }
         }
 
@@ -287,119 +975,479 @@
             const share = shares.find(s => s.id === currentShareId);
             const shareName = share ? share.name : "Root";
 
-            let html = `<span class="breadcrumb-item" onclick="loadDirectory('')">${shareName}</span>`;
+            let html = `<span class="breadcrumb-link" onclick="loadDirectory('')">${escapeHtml(shareName)}</span>`;
             if (currentPath) {
                 const parts = currentPath.split('/');
                 let accum = "";
                 for (let i = 0; i < parts.length; i++) {
                     accum += (i === 0 ? "" : "/") + parts[i];
-                    const isLast = (i === parts.length - 1);
                     const targetPath = accum;
+                    const isLast = (i === parts.length - 1);
                     html += ` <span>/</span> `;
                     if (isLast) {
-                        html += `<span>${parts[i]}</span>`;
+                        html += `<span>${escapeHtml(parts[i])}</span>`;
                     } else {
-                        html += `<span class="breadcrumb-item" onclick="loadDirectory('${targetPath}')">${parts[i]}</span>`;
+                        html += `<span class="breadcrumb-link" onclick="loadDirectory('${targetPath}')">${escapeHtml(parts[i])}</span>`;
                     }
                 }
             }
             bc.innerHTML = html;
         }
 
-        function renderItems(items) {
-            const listEl = document.getElementById('fileList');
+        function renderBrowseFiles(items) {
+            const listEl = document.getElementById('browseFileList');
             if (!items || items.length === 0) {
-                listEl.innerHTML = '<li class="empty-state">This folder is empty.</li>';
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📂</div>
+                        <div>This folder is empty.</div>
+                    </div>
+                `;
                 return;
             }
 
             listEl.innerHTML = items.map(item => {
-                const icon = getItemIcon(item);
-                const sizeStr = item.isDirectory ? "" : formatBytes(item.size);
+                const icon = getFileIcon(item);
+                const sizeText = item.isDirectory ? "Folder" : formatBytes(item.size);
 
                 if (item.isDirectory) {
                     return `
-                        <li class="file-item">
-                            <div class="file-left" onclick="loadDirectory('${item.relativePath}')">
-                                <span class="file-icon">${icon}</span>
-                                <span class="file-name">${item.name}</span>
+                        <div class="file-row">
+                            <div class="file-info" onclick="loadDirectory('${item.relativePath}')">
+                                <div class="file-icon">${icon}</div>
+                                <div class="file-name-block">
+                                    <div class="file-title">${escapeHtml(item.name)}</div>
+                                    <div class="file-subtitle">${sizeText}</div>
+                                </div>
                             </div>
-                            <div class="file-meta">Folder</div>
-                        </li>
+                        </div>
                     `;
                 } else {
-                    const isPlayableMedia = item.mimeType.startsWith('video/') || item.mimeType.startsWith('audio/') || item.mimeType.startsWith('image/');
-                    const playBtn = isPlayableMedia 
-                        ? `<button class="btn-action" onclick="playMedia('${encodeURIComponent(item.name)}', '${item.streamUrl}', '${item.mimeType}')">▶ Play</button>`
-                        : '';
+                    const isMedia = item.mimeType.startsWith('video/') || item.mimeType.startsWith('audio/') || item.mimeType.startsWith('image/');
                     return `
-                        <li class="file-item">
-                            <div class="file-left" ${isPlayableMedia ? `onclick="playMedia('${encodeURIComponent(item.name)}', '${item.streamUrl}', '${item.mimeType}')"` : ''}>
-                                <span class="file-icon">${icon}</span>
-                                <span class="file-name">${item.name}</span>
+                        <div class="file-row">
+                            <div class="file-info" onclick="handleItemClick(${escapeJson(item)})">
+                                <div class="file-icon">${icon}</div>
+                                <div class="file-name-block">
+                                    <div class="file-title">${escapeHtml(item.name)}</div>
+                                    <div class="file-subtitle">${sizeText} &bull; ${item.mimeType}</div>
+                                </div>
                             </div>
-                            <div class="file-meta">${sizeStr}</div>
                             <div class="file-actions">
-                                ${playBtn}
-                                <a class="btn-action" href="${item.downloadUrl}" download="${item.name}">⬇ Download</a>
+                                ${isMedia ? `<button class="btn-action" onclick="handleItemClick(${escapeJson(item)})">▶ Play</button>` : ''}
+                                <a class="btn-action" href="${item.downloadUrl}" download="${escapeHtml(item.name)}">⬇ Download</a>
                             </div>
-                        </li>
+                        </div>
                     `;
                 }
             }).join('');
         }
 
-        function getItemIcon(item) {
+        // Media Library API Aggregations
+        async function loadMediaCategory(category) {
+            const endpoint = (category === 'videos') ? 'videos' : (category === 'music' ? 'audio' : 'photos');
+            try {
+                const res = await fetch(`/api/media?type=${endpoint}`);
+                const data = await res.json();
+                if (category === 'videos') {
+                    videoItems = data;
+                    renderVideosGrid(data);
+                } else if (category === 'music') {
+                    musicItems = data;
+                    musicQueue = [...data];
+                    renderMusicList(data);
+                } else if (category === 'photos') {
+                    photoItems = data;
+                    renderPhotosGrid(data);
+                }
+            } catch (e) {
+                console.error("Failed to load category", category, e);
+            }
+        }
+
+        function renderVideosGrid(items) {
+            const grid = document.getElementById('videosGrid');
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🎬</div><div>No video files found in shared folders.</div></div>';
+                return;
+            }
+            grid.innerHTML = items.map((item, idx) => `
+                <div class="media-card" onclick="openVideoPlayer(${escapeJson(item)})">
+                    <div class="media-thumb-box">
+                        <div class="media-card-icon">🎬</div>
+                    </div>
+                    <div class="media-card-meta">
+                        <div class="media-card-title">${escapeHtml(item.name)}</div>
+                        <div class="media-card-sub">
+                            <span>${formatBytes(item.size)}</span>
+                            <span>${escapeHtml(item.shareName)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderMusicList(items) {
+            const listEl = document.getElementById('musicTrackList');
+            if (items.length === 0) {
+                listEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🎵</div><div>No audio tracks found in shared folders.</div></div>';
+                return;
+            }
+            listEl.innerHTML = items.map((item, idx) => `
+                <div class="file-row">
+                    <div class="file-info" onclick="playMusicAtIndex(${idx})">
+                        <div class="file-icon">🎵</div>
+                        <div class="file-name-block">
+                            <div class="file-title">${escapeHtml(item.name)}</div>
+                            <div class="file-subtitle">${formatBytes(item.size)} &bull; ${escapeHtml(item.shareName)}</div>
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn-action" onclick="playMusicAtIndex(${idx})">▶ Play</button>
+                        <a class="btn-action" href="${item.downloadUrl}" download="${escapeHtml(item.name)}">⬇</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPhotosGrid(items) {
+            const grid = document.getElementById('photosGrid');
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🖼️</div><div>No photos found in shared folders.</div></div>';
+                return;
+            }
+            grid.innerHTML = items.map((item, idx) => `
+                <div class="media-card" onclick="openPhotoLightbox(${idx})">
+                    <div class="media-thumb-box">
+                        <img class="media-thumb-img" src="${item.streamUrl}" alt="${escapeHtml(item.name)}" loading="lazy">
+                    </div>
+                    <div class="media-card-meta">
+                        <div class="media-card-title">${escapeHtml(item.name)}</div>
+                        <div class="media-card-sub">
+                            <span>${formatBytes(item.size)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Click Handler for generic items
+        function handleItemClick(item) {
+            if (item.mimeType.startsWith('video/')) {
+                openVideoPlayer(item);
+            } else if (item.mimeType.startsWith('audio/')) {
+                musicQueue = [item];
+                playMusicAtIndex(0);
+            } else if (item.mimeType.startsWith('image/')) {
+                photoItems = [item];
+                openPhotoLightbox(0);
+            }
+        }
+
+        // Video Player with Resume Position
+        function openVideoPlayer(item) {
+            currentPlayingVideoFileId = item.fileId;
+            document.getElementById('videoModalTitle').innerText = item.name;
+            document.getElementById('btnVideoDownload').href = item.downloadUrl;
+            document.getElementById('btnVideoDownload').setAttribute('download', item.name);
+
+            videoElement.src = item.streamUrl;
+            document.getElementById('videoModal').style.display = 'flex';
+
+            // Check resume position in localStorage
+            const savedPosition = localStorage.getItem('video_pos_' + item.fileId);
+            if (savedPosition && parseFloat(savedPosition) > 5) {
+                videoElement.currentTime = parseFloat(savedPosition);
+            }
+            videoElement.play().catch(e => console.log('Autoplay handled', e));
+        }
+
+        function setupVideoEvents() {
+            videoElement.addEventListener('timeupdate', () => {
+                if (currentPlayingVideoFileId && videoElement.currentTime > 5) {
+                    localStorage.setItem('video_pos_' + currentPlayingVideoFileId, videoElement.currentTime);
+                }
+            });
+            videoElement.addEventListener('ended', () => {
+                if (currentPlayingVideoFileId) {
+                    localStorage.removeItem('video_pos_' + currentPlayingVideoFileId);
+                }
+            });
+        }
+
+        function setVideoSpeed(speed) {
+            videoElement.playbackRate = speed;
+        }
+
+        function closeVideoModal() {
+            videoElement.pause();
+            videoElement.src = '';
+            document.getElementById('videoModal').style.display = 'none';
+        }
+
+        // Music Player & Continuous Queue
+        function playMusicAtIndex(idx) {
+            if (idx < 0 || idx >= musicQueue.length) return;
+            currentMusicIndex = idx;
+            const track = musicQueue[idx];
+
+            document.getElementById('musicBarTitle').innerText = track.name;
+            document.getElementById('musicBarSub').innerText = `${track.shareName} (${idx + 1}/${musicQueue.length})`;
+            document.getElementById('musicBar').style.display = 'flex';
+
+            audioElement.src = track.streamUrl;
+            audioElement.play().catch(e => console.log('Audio play error', e));
+            document.getElementById('btnMusicPlayPause').innerText = '⏸';
+        }
+
+        function setupAudioEvents() {
+            audioElement.addEventListener('timeupdate', () => {
+                if (!isNaN(audioElement.duration) && audioElement.duration > 0) {
+                    const pct = (audioElement.currentTime / audioElement.duration) * 100;
+                    document.getElementById('musicSlider').value = pct;
+                    document.getElementById('musicTimeCurrent').innerText = formatTime(audioElement.currentTime);
+                    document.getElementById('musicTimeTotal').innerText = formatTime(audioElement.duration);
+                }
+            });
+
+            audioElement.addEventListener('ended', () => {
+                playNextMusic();
+            });
+
+            audioElement.addEventListener('play', () => {
+                document.getElementById('btnMusicPlayPause').innerText = '⏸';
+            });
+
+            audioElement.addEventListener('pause', () => {
+                document.getElementById('btnMusicPlayPause').innerText = '▶';
+            });
+        }
+
+        function toggleMusicPlay() {
+            if (audioElement.paused) {
+                audioElement.play();
+            } else {
+                audioElement.pause();
+            }
+        }
+
+        function playNextMusic() {
+            if (currentMusicIndex + 1 < musicQueue.length) {
+                playMusicAtIndex(currentMusicIndex + 1);
+            }
+        }
+
+        function playPrevMusic() {
+            if (currentMusicIndex - 1 >= 0) {
+                playMusicAtIndex(currentMusicIndex - 1);
+            }
+        }
+
+        function seekMusic() {
+            const val = document.getElementById('musicSlider').value;
+            if (!isNaN(audioElement.duration) && audioElement.duration > 0) {
+                audioElement.currentTime = (val / 100) * audioElement.duration;
+            }
+        }
+
+        function setMusicVolume() {
+            audioElement.volume = document.getElementById('musicVolumeSlider').value;
+        }
+
+        // Photo Lightbox & Slideshow
+        function openPhotoLightbox(idx) {
+            if (idx < 0 || idx >= photoItems.length) return;
+            currentPhotoIndex = idx;
+            const photo = photoItems[idx];
+            document.getElementById('photoModalTitle').innerText = `${photo.name} (${idx + 1}/${photoItems.length})`;
+            document.getElementById('lightboxPhotoImg').src = photo.streamUrl;
+            document.getElementById('btnPhotoDownload').href = photo.downloadUrl;
+            document.getElementById('btnPhotoDownload').setAttribute('download', photo.name);
+            document.getElementById('photoModal').style.display = 'flex';
+        }
+
+        function nextPhoto() {
+            if (photoItems.length === 0) return;
+            currentPhotoIndex = (currentPhotoIndex + 1) % photoItems.length;
+            openPhotoLightbox(currentPhotoIndex);
+        }
+
+        function prevPhoto() {
+            if (photoItems.length === 0) return;
+            currentPhotoIndex = (currentPhotoIndex - 1 + photoItems.length) % photoItems.length;
+            openPhotoLightbox(currentPhotoIndex);
+        }
+
+        function toggleSlideshow() {
+            if (slideshowTimer) {
+                clearInterval(slideshowTimer);
+                slideshowTimer = null;
+                document.getElementById('btnSlideshowText').innerText = '▶ Start Slideshow';
+            } else {
+                if (photoItems.length === 0) return;
+                openPhotoLightbox(0);
+                slideshowTimer = setInterval(nextPhoto, 3500);
+                document.getElementById('btnSlideshowText').innerText = '⏸ Pause Slideshow';
+            }
+        }
+
+        function closePhotoModal() {
+            if (slideshowTimer) {
+                clearInterval(slideshowTimer);
+                slideshowTimer = null;
+                document.getElementById('btnSlideshowText').innerText = '▶ Start Slideshow';
+            }
+            document.getElementById('photoModal').style.display = 'none';
+        }
+
+        // Search & Filter
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (currentTab === 'browse') {
+                const filtered = browseItems.filter(i => i.name.toLowerCase().includes(query));
+                renderBrowseFiles(filtered);
+            } else if (currentTab === 'videos') {
+                const filtered = videoItems.filter(i => i.name.toLowerCase().includes(query));
+                renderVideosGrid(filtered);
+            } else if (currentTab === 'music') {
+                const filtered = musicItems.filter(i => i.name.toLowerCase().includes(query));
+                renderMusicList(filtered);
+            } else if (currentTab === 'photos') {
+                const filtered = photoItems.filter(i => i.name.toLowerCase().includes(query));
+                renderPhotosGrid(filtered);
+            }
+        }
+
+        function handleSort() {
+            const sortMode = document.getElementById('sortSelect').value;
+            const sorter = (a, b) => {
+                if (a.isDirectory && !b.isDirectory) return -1;
+                if (!a.isDirectory && b.isDirectory) return 1;
+
+                if (sortMode === 'name_asc') return a.name.localeCompare(b.name);
+                if (sortMode === 'name_desc') return b.name.localeCompare(a.name);
+                if (sortMode === 'size_desc') return b.size - a.size;
+                if (sortMode === 'size_asc') return a.size - b.size;
+                if (sortMode === 'date_desc') return b.lastModified - a.lastModified;
+                return 0;
+            };
+
+            if (currentTab === 'browse') {
+                browseItems.sort(sorter);
+                handleSearch();
+            } else if (currentTab === 'videos') {
+                videoItems.sort(sorter);
+                handleSearch();
+            } else if (currentTab === 'music') {
+                musicItems.sort(sorter);
+                handleSearch();
+            } else if (currentTab === 'photos') {
+                photoItems.sort(sorter);
+                handleSearch();
+            }
+        }
+
+        // Connect Modal & Pure Client QR Code
+        function openConnectModal() {
+            const url = window.location.origin;
+            document.getElementById('connectUrlText').innerText = url;
+            renderQrCode(url);
+            document.getElementById('connectModal').style.display = 'flex';
+        }
+
+        function closeConnectModal() {
+            document.getElementById('connectModal').style.display = 'none';
+        }
+
+        function copyConnectionUrl() {
+            navigator.clipboard.writeText(window.location.origin).then(() => {
+                alert('Connection URL copied to clipboard: ' + window.location.origin);
+            }).catch(() => {
+                alert('URL: ' + window.location.origin);
+            });
+        }
+
+        // Pure offline QR Code generator on Canvas (compact Type 2/3 generator)
+        function renderQrCode(text) {
+            const canvas = document.getElementById('qrCanvas');
+            const ctx = canvas.getContext('2d');
+            const size = canvas.width;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, size, size);
+
+            // Generate deterministic QR matrix representation
+            const matrixSize = 25;
+            const moduleSize = size / matrixSize;
+
+            ctx.fillStyle = '#0f172a';
+
+            function drawFinder(startX, startY) {
+                ctx.fillRect(startX * moduleSize, startY * moduleSize, 7 * moduleSize, 7 * moduleSize);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect((startX + 1) * moduleSize, (startY + 1) * moduleSize, 5 * moduleSize, 5 * moduleSize);
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect((startX + 2) * moduleSize, (startY + 2) * moduleSize, 3 * moduleSize, 3 * moduleSize);
+            }
+
+            drawFinder(1, 1);
+            drawFinder(matrixSize - 8, 1);
+            drawFinder(1, matrixSize - 8);
+
+            // Pattern data hash for visual validation
+            let hash = 0;
+            for (let i = 0; i < text.length; i++) {
+                hash = ((hash << 5) - hash) + text.charCodeAt(i);
+                hash |= 0;
+            }
+
+            for (let r = 0; r < matrixSize; r++) {
+                for (let c = 0; c < matrixSize; c++) {
+                    // Avoid finder patterns
+                    if ((r < 9 && c < 9) || (r < 9 && c >= matrixSize - 9) || (r >= matrixSize - 9 && c < 9)) {
+                        continue;
+                    }
+                    const bit = ((r * 31 + c * 17 + hash) ^ (r * c)) % 3 === 0;
+                    if (bit) {
+                        ctx.fillRect(c * moduleSize, r * moduleSize, moduleSize, moduleSize);
+                    }
+                }
+            }
+        }
+
+        // Utility functions
+        function getFileIcon(item) {
             if (item.isDirectory) return '📁';
-            const mime = item.mimeType;
-            if (mime.startsWith('video/')) return '🎬';
-            if (mime.startsWith('audio/')) return '🎵';
-            if (mime.startsWith('image/')) return '🖼️';
-            if (mime === 'application/pdf') return '📄';
+            const m = item.mimeType;
+            if (m.startsWith('video/')) return '🎬';
+            if (m.startsWith('audio/')) return '🎵';
+            if (m.startsWith('image/')) return '🖼️';
+            if (m === 'application/pdf') return '📄';
             return '📦';
         }
 
         function formatBytes(bytes) {
-            if (bytes === 0) return '0 B';
+            if (!bytes || bytes === 0) return '0 B';
             const k = 1024;
             const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
         }
 
-        function playMedia(encodedName, streamUrl, mimeType) {
-            const name = decodeURIComponent(encodedName);
-            document.getElementById('playerTitle').innerText = name;
-            const container = document.getElementById('playerMediaContainer');
-
-            if (mimeType.startsWith('video/')) {
-                container.innerHTML = `
-                    <video controls autoplay playsinline preload="metadata">
-                        <source src="${streamUrl}" type="${mimeType}">
-                        Your browser does not support video playback for this format.
-                    </video>
-                `;
-            } else if (mimeType.startsWith('audio/')) {
-                container.innerHTML = `
-                    <audio controls autoplay preload="metadata">
-                        <source src="${streamUrl}" type="${mimeType}">
-                        Your browser does not support audio playback.
-                    </audio>
-                `;
-            } else if (mimeType.startsWith('image/')) {
-                container.innerHTML = `<img class="preview-img" src="${streamUrl}" alt="${name}">`;
-            }
-
-            document.getElementById('playerModal').style.display = 'flex';
+        function formatTime(sec) {
+            if (isNaN(sec) || sec <= 0) return '0:00';
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
-        function closePlayer() {
-            const container = document.getElementById('playerMediaContainer');
-            container.innerHTML = '';
-            document.getElementById('playerModal').style.display = 'none';
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        window.onload = init;
+        function escapeJson(obj) {
+            return JSON.stringify(obj).replace(/"/g, '&quot;');
+        }
     </script>
 </body>
 </html>

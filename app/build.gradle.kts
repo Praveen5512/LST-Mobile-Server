@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.documentfile)
+    implementation(libs.zxing.core)
 
     // Ktor embedded server
     implementation(libs.ktor.server.core)

@@ -7,6 +7,7 @@ material = "1.12.0"
 constraintlayout = "2.1.4"
 ktor = "2.3.12"
 coroutines = "1.8.1"
+zxing = "3.5.3"
 junit = "4.13.2"
 androidxJunit = "1.2.1"
 espresso = "3.6.1"
@@ -26,6 +27,7 @@ ktor-server-status-pages = { group = "io.ktor", name = "ktor-server-status-pages
 
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit" }

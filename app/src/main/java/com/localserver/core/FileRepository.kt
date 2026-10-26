@@ -20,6 +20,18 @@ data class FileEntry(
     val relativePath: String
 )
 
+data class MediaItem(
+    val shareId: String,
+    val shareName: String,
+    val fileId: String,
+    val name: String,
+    val size: Long,
+    val lastModified: Long,
+    val mimeType: String,
+    val streamUrl: String,
+    val downloadUrl: String
+)
+
 data class ResolvedFile(
     val documentFile: DocumentFile,
     val name: String,
@@ -108,6 +120,70 @@ class FileRepository(
             compareBy<FileEntry> { !it.isDirectory }
                 .thenBy { it.name.lowercase() }
         )
+    }
+
+    /**
+     * Recursively aggregates media items (videos, audio, photos) across all accessible shares.
+     */
+    fun findMediaFiles(category: String, maxItems: Int = 300): List<MediaItem> {
+        val result = mutableListOf<MediaItem>()
+        val shares = shareRegistry.shares.value.filter { it.isAccessible }
+
+        for (share in shares) {
+            val rootDoc = try {
+                DocumentFile.fromTreeUri(context, share.uri)
+            } catch (_: Exception) {
+                null
+            } ?: continue
+
+            val queue = java.util.ArrayDeque<Pair<DocumentFile, String>>()
+            queue.add(Pair(rootDoc, ""))
+
+            while (queue.isNotEmpty() && result.size < maxItems) {
+                val (currentDir, relPath) = queue.removeFirst()
+                val children = try {
+                    currentDir.listFiles()
+                } catch (_: Exception) {
+                    emptyArray()
+                }
+
+                for (child in children) {
+                    val name = child.name ?: continue
+                    val childRelPath = if (relPath.isEmpty()) name else "$relPath/$name"
+                    if (child.isDirectory) {
+                        if (childRelPath.count { it == '/' } < 4) {
+                            queue.add(Pair(child, childRelPath))
+                        }
+                    } else if (child.isFile) {
+                        val mime = MimeTypeResolver.resolve(name, child.type)
+                        val matches = when (category.lowercase()) {
+                            "videos" -> MimeTypeResolver.isVideo(mime)
+                            "audio" -> MimeTypeResolver.isAudio(mime)
+                            "photos" -> MimeTypeResolver.isImage(mime)
+                            else -> true
+                        }
+                        if (matches) {
+                            val fileId = URLEncoder.encode(childRelPath, StandardCharsets.UTF_8.name())
+                            result.add(
+                                MediaItem(
+                                    shareId = share.id,
+                                    shareName = share.name,
+                                    fileId = fileId,
+                                    name = name,
+                                    size = child.length(),
+                                    lastModified = child.lastModified(),
+                                    mimeType = mime,
+                                    streamUrl = "/api/shares/${share.id}/files/$fileId/stream",
+                                    downloadUrl = "/api/shares/${share.id}/files/$fileId/download"
+                                )
+                            )
+                            if (result.size >= maxItems) break
+                        }
+                    }
+                }
+            }
+        }
+        return result.sortedByDescending { it.lastModified }
     }
 
     /**

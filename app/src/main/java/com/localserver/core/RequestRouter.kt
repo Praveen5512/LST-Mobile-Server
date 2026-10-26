@@ -92,6 +92,29 @@ class RequestRouter(
                 call.respondText(json.toString(), ContentType.Application.Json)
             }
 
+            // Media Library API (aggregated videos, audio, photos)
+            get("/api/media") {
+                val type = call.request.queryParameters["type"] ?: "all"
+                val items = fileRepository.findMediaFiles(type)
+                val array = JSONArray()
+                for (item in items) {
+                    array.put(
+                        JSONObject().apply {
+                            put("shareId", item.shareId)
+                            put("shareName", item.shareName)
+                            put("fileId", item.fileId)
+                            put("name", item.name)
+                            put("size", item.size)
+                            put("lastModified", item.lastModified)
+                            put("mimeType", item.mimeType)
+                            put("streamUrl", item.streamUrl)
+                            put("downloadUrl", item.downloadUrl)
+                        }
+                    )
+                }
+                call.respondText(array.toString(), ContentType.Application.Json)
+            }
+
             // Shares API
             route("/api/shares") {
                 get {

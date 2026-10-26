@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
 import com.localserver.core.NetworkAddress
+import com.localserver.core.QrCodeGenerator
 import com.localserver.core.ServerConfig
 import com.localserver.core.ServerService
 import com.localserver.core.ServerState
@@ -127,6 +128,24 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        binding.btnShowQrCode.setOnClickListener {
+            val state = ServerService.serviceState.value
+            if (state is ServerState.Running) {
+                val primaryUrl = state.addresses.firstOrNull()?.toUrl(state.config.port)
+                    ?: "http://localhost:${state.config.port}"
+                showQrCodeDialog(primaryUrl)
+            }
+        }
+
+        binding.btnCopyUrl.setOnClickListener {
+            val state = ServerService.serviceState.value
+            if (state is ServerState.Running) {
+                val primaryUrl = state.addresses.firstOrNull()?.toUrl(state.config.port)
+                    ?: "http://localhost:${state.config.port}"
+                copyToClipboard(primaryUrl)
+            }
+        }
+
         binding.btnOpenBrowser.setOnClickListener {
             val state = ServerService.serviceState.value
             if (state is ServerState.Running) {
@@ -136,6 +155,52 @@ class MainActivity : AppCompatActivity() {
                 startActivity(browserIntent)
             }
         }
+    }
+
+    private fun showQrCodeDialog(url: String) {
+        val bitmap = QrCodeGenerator.generateQrBitmap(url, 600, 600)
+        if (bitmap == null) {
+            Toast.makeText(this, "Failed to generate QR code", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val dialogLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            setPadding(40, 30, 40, 20)
+        }
+
+        val qrImageView = android.widget.ImageView(this).apply {
+            setImageBitmap(bitmap)
+            layoutParams = LinearLayout.LayoutParams(500, 500)
+        }
+
+        val urlText = TextView(this).apply {
+            text = url
+            textSize = 14f
+            setTextColor(ContextCompat.getColor(this@MainActivity, R.color.accent))
+            gravity = Gravity.CENTER
+            setPadding(0, 20, 0, 0)
+        }
+
+        dialogLayout.addView(qrImageView)
+        dialogLayout.addView(urlText)
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle("Scan to Connect")
+            .setView(dialogLayout)
+            .setPositiveButton("Close", null)
+            .setNeutralButton("Copy URL") { _, _ ->
+                copyToClipboard(url)
+            }
+            .show()
+    }
+
+    private fun copyToClipboard(url: String) {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
+        val clip = android.content.ClipData.newPlainText("Media Server URL", url)
+        clipboard?.setPrimaryClip(clip)
+        Toast.makeText(this, "Copied URL: $url", Toast.LENGTH_SHORT).show()
     }
 
     private fun observeState() {
@@ -231,6 +296,8 @@ class MainActivity : AppCompatActivity() {
                 binding.btnStop.isEnabled = false
                 binding.etPort.isEnabled = true
                 binding.btnOpenBrowser.isEnabled = false
+                binding.btnShowQrCode.isEnabled = false
+                binding.btnCopyUrl.isEnabled = false
             }
             is ServerState.Starting -> {
                 binding.tvStatus.text = getString(R.string.server_status_starting)
@@ -240,6 +307,8 @@ class MainActivity : AppCompatActivity() {
                 binding.btnStop.isEnabled = false
                 binding.etPort.isEnabled = false
                 binding.btnOpenBrowser.isEnabled = false
+                binding.btnShowQrCode.isEnabled = false
+                binding.btnCopyUrl.isEnabled = false
             }
             is ServerState.Running -> {
                 binding.tvStatus.text = getString(R.string.server_status_running)
@@ -249,6 +318,8 @@ class MainActivity : AppCompatActivity() {
                 binding.btnStop.isEnabled = true
                 binding.etPort.isEnabled = false
                 binding.btnOpenBrowser.isEnabled = true
+                binding.btnShowQrCode.isEnabled = true
+                binding.btnCopyUrl.isEnabled = true
                 updateAddressDisplay(state.addresses, state.config.port)
             }
             is ServerState.Error -> {
@@ -259,6 +330,8 @@ class MainActivity : AppCompatActivity() {
                 binding.btnStop.isEnabled = false
                 binding.etPort.isEnabled = true
                 binding.btnOpenBrowser.isEnabled = false
+                binding.btnShowQrCode.isEnabled = false
+                binding.btnCopyUrl.isEnabled = false
 
                 // If port in use, auto-suggest next port
                 if (state.message.contains("already in use", ignoreCase = true)) {
