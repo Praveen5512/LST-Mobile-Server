@@ -40,9 +40,14 @@ class ServerService : Service() {
             serverController.serverState.collect { state ->
                 _serviceState.value = state
                 updateNotification(state)
-                if (state is ServerState.Stopped) {
+                if (state is ServerState.Running) {
+                    nsdDiscoveryManager.registerServer(state.config.port)
+                } else if (state is ServerState.Stopped) {
+                    nsdDiscoveryManager.unregisterServer()
                     stopForeground(STOP_FOREGROUND_REMOVE)
                     stopSelf()
+                } else {
+                    nsdDiscoveryManager.unregisterServer()
                 }
             }
         }
@@ -89,6 +94,7 @@ class ServerService : Service() {
 
     override fun onDestroy() {
         Log.i(TAG, "ServerService onDestroy")
+        runCatching { nsdDiscoveryManager.unregisterServer() }
         serverController.stop()
         networkManager.stopMonitoring()
         releaseLocks()
@@ -215,6 +221,7 @@ class ServerService : Service() {
         lateinit var shareRegistry: ShareRegistry
         lateinit var fileRepository: FileRepository
         lateinit var serverController: ServerController
+        lateinit var nsdDiscoveryManager: NsdDiscoveryManager
 
         private val _serviceState = MutableStateFlow<ServerState>(ServerState.Stopped)
         val serviceState: StateFlow<ServerState> = _serviceState.asStateFlow()
@@ -227,6 +234,7 @@ class ServerService : Service() {
                 shareRegistry = ShareRegistry(appCtx)
                 fileRepository = FileRepository(appCtx, shareRegistry)
                 serverController = ServerController(appCtx, networkManager, shareRegistry, fileRepository)
+                nsdDiscoveryManager = NsdDiscoveryManager(appCtx)
             }
         }
 

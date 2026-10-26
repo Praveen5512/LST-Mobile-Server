@@ -34,6 +34,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ClientViewerActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
+            android:windowSoftInputMode="adjustResize" />
+
         <service
             android:name=".core.ServerService"
             android:enabled="true"

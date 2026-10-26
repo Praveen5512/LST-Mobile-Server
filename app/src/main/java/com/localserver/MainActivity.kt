@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.button.MaterialButton
+import com.localserver.core.DiscoveredServer
 import com.localserver.core.NetworkAddress
 import com.localserver.core.QrCodeGenerator
 import com.localserver.core.ServerConfig
@@ -146,6 +147,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        binding.btnOpenInAppViewer.setOnClickListener {
+            val state = ServerService.serviceState.value
+            if (state is ServerState.Running) {
+                val primaryUrl = state.addresses.firstOrNull()?.toUrl(state.config.port)
+                    ?: "http://localhost:${state.config.port}"
+                ClientViewerActivity.start(this, primaryUrl, "Local Server (This Device)")
+            }
+        }
+
         binding.btnOpenBrowser.setOnClickListener {
             val state = ServerService.serviceState.value
             if (state is ServerState.Running) {
@@ -154,6 +164,31 @@ class MainActivity : AppCompatActivity() {
                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(primaryUrl))
                 startActivity(browserIntent)
             }
+        }
+
+        binding.btnScanServers.setOnClickListener {
+            if (ServerService.nsdDiscoveryManager.isDiscovering.value) {
+                ServerService.nsdDiscoveryManager.stopDiscovery()
+            } else {
+                ServerService.nsdDiscoveryManager.startDiscovery()
+            }
+        }
+
+        binding.btnConnectManual.setOnClickListener {
+            val input = binding.etManualUrl.text?.toString()?.trim() ?: ""
+            if (input.isEmpty() || input == "http://" || input == "https://") {
+                binding.tilManualUrl.error = "Please enter a valid IP:port (e.g. 192.168.1.10:8080)"
+                return@setOnClickListener
+            }
+            binding.tilManualUrl.error = null
+
+            val url = if (input.startsWith("http://", ignoreCase = true) || input.startsWith("https://", ignoreCase = true)) {
+                input
+            } else {
+                "http://$input"
+            }
+
+            ClientViewerActivity.start(this, url, "Remote Media Server")
         }
     }
 
@@ -227,6 +262,20 @@ class MainActivity : AppCompatActivity() {
                 renderSharesList(shares)
             }
         }
+
+        lifecycleScope.launch {
+            ServerService.nsdDiscoveryManager.isDiscovering.collect { isScanning ->
+                binding.progressScanning.visibility = if (isScanning) View.VISIBLE else View.GONE
+                binding.btnScanServers.text = if (isScanning) "⏹ Stop Scan" else "🔍 Scan Network"
+                binding.tvScanStatus.text = if (isScanning) "Scanning local network (mDNS)..." else "Scan stopped"
+            }
+        }
+
+        lifecycleScope.launch {
+            ServerService.nsdDiscoveryManager.discoveredServers.collect { servers ->
+                renderDiscoveredServers(servers)
+            }
+        }
     }
 
     private fun renderSharesList(shares: List<ShareRoot>) {
@@ -286,6 +335,101 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun renderDiscoveredServers(servers: List<DiscoveredServer>) {
+        binding.layoutDiscoveredServers.removeAllViews()
+
+        if (servers.isEmpty()) {
+            binding.layoutDiscoveredServers.addView(binding.tvNoDiscoveredServers)
+            return
+        }
+
+        for (server in servers) {
+            val card = com.google.android.material.card.MaterialCardView(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    setMargins(0, 8, 0, 8)
+                }
+                setCardBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.surface))
+                strokeColor = ContextCompat.getColor(this@MainActivity, R.color.surface_border)
+                strokeWidth = 1
+                radius = 16f
+            }
+
+            val cardInner = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(24, 20, 24, 20)
+            }
+
+            val nameView = TextView(this).apply {
+                text = "🖥️ ${server.serviceName}"
+                setTextColor(ContextCompat.getColor(this@MainActivity, R.color.text_primary))
+                textSize = 14f
+                typeface = android.graphics.Typeface.DEFAULT_BOLD
+            }
+
+            val urlView = TextView(this).apply {
+                text = server.url
+                setTextColor(ContextCompat.getColor(this@MainActivity, R.color.accent))
+                textSize = 12f
+                typeface = android.graphics.Typeface.MONOSPACE
+                setPadding(0, 4, 0, 12)
+            }
+
+            val buttonRow = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            }
+
+            val openClientBtn = MaterialButton(this).apply {
+                text = "📱 Open Client"
+                textSize = 12f
+                isAllCaps = false
+                setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.accent))
+                setTextColor(ContextCompat.getColor(this@MainActivity, R.color.background))
+                cornerRadius = 12
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                    marginEnd = 12
+                }
+                setOnClickListener {
+                    ClientViewerActivity.start(this@MainActivity, server.url, server.serviceName)
+                }
+            }
+
+            val openBrowserBtn = MaterialButton(
+                this,
+                null,
+                com.google.android.material.R.attr.borderlessButtonStyle
+            ).apply {
+                text = "🌐 Browser"
+                textSize = 12f
+                isAllCaps = false
+                setTextColor(ContextCompat.getColor(this@MainActivity, R.color.accent))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                setOnClickListener {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(server.url)))
+                }
+            }
+
+            buttonRow.addView(openClientBtn)
+            buttonRow.addView(openBrowserBtn)
+
+            cardInner.addView(nameView)
+            cardInner.addView(urlView)
+            cardInner.addView(buttonRow)
+            card.addView(cardInner)
+
+            binding.layoutDiscoveredServers.addView(card)
+        }
+    }
+
     private fun renderState(state: ServerState) {
         when (state) {
             is ServerState.Stopped -> {
@@ -295,6 +439,7 @@ class MainActivity : AppCompatActivity() {
                 binding.btnStart.isEnabled = true
                 binding.btnStop.isEnabled = false
                 binding.etPort.isEnabled = true
+                binding.btnOpenInAppViewer.isEnabled = false
                 binding.btnOpenBrowser.isEnabled = false
                 binding.btnShowQrCode.isEnabled = false
                 binding.btnCopyUrl.isEnabled = false
@@ -306,6 +451,7 @@ class MainActivity : AppCompatActivity() {
                 binding.btnStart.isEnabled = false
                 binding.btnStop.isEnabled = false
                 binding.etPort.isEnabled = false
+                binding.btnOpenInAppViewer.isEnabled = false
                 binding.btnOpenBrowser.isEnabled = false
                 binding.btnShowQrCode.isEnabled = false
                 binding.btnCopyUrl.isEnabled = false
@@ -317,6 +463,7 @@ class MainActivity : AppCompatActivity() {
                 binding.btnStart.isEnabled = false
                 binding.btnStop.isEnabled = true
                 binding.etPort.isEnabled = false
+                binding.btnOpenInAppViewer.isEnabled = true
                 binding.btnOpenBrowser.isEnabled = true
                 binding.btnShowQrCode.isEnabled = true
                 binding.btnCopyUrl.isEnabled = true
@@ -329,6 +476,7 @@ class MainActivity : AppCompatActivity() {
                 binding.btnStart.isEnabled = true
                 binding.btnStop.isEnabled = false
                 binding.etPort.isEnabled = true
+                binding.btnOpenInAppViewer.isEnabled = false
                 binding.btnOpenBrowser.isEnabled = false
                 binding.btnShowQrCode.isEnabled = false
                 binding.btnCopyUrl.isEnabled = false
