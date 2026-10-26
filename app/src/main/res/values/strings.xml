@@ -15,4 +15,7 @@
     <string name="notification_stop_action">Stop Server</string>
     <string name="open_in_browser">Open in Local Browser</string>
     <string name="security_notice">⚠️ Anyone on the same Wi-Fi or Hotspot network can access files shared by this server.</string>
+    <string name="shared_folders_label">Shared Folders</string>
+    <string name="btn_add_folder">+ Add Folder</string>
+    <string name="no_folders_shared">No folders shared yet. Tap \"+ Add Folder\" to select directories to share.</string>
 </resources>

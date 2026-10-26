@@ -27,7 +27,10 @@ sealed class ServerState {
 }
 
 class ServerController(
-    private val networkManager: NetworkManager
+    private val context: android.content.Context,
+    private val networkManager: NetworkManager,
+    private val shareRegistry: ShareRegistry,
+    private val fileRepository: FileRepository
 ) {
     private val scope = CoroutineScope(Dispatchers.IO + Job())
     private var engine: ApplicationEngine? = null
@@ -48,7 +51,7 @@ class ServerController(
             try {
                 Log.i(TAG, "Starting Ktor CIO server on ${config.bindAddress}:${config.port}")
 
-                val router = RequestRouter(config, networkManager)
+                val router = RequestRouter(context, config, networkManager, shareRegistry, fileRepository)
 
                 val newEngine = embeddedServer(
                     factory = CIO,

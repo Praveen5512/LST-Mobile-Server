@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Media Server</title>
+    <style>
+        :root {
+            --bg: #090d16;
+            --surface: #131d31;
+            --surface-hover: #1c2b47;
+            --border: #223252;
+            --accent: #38bdf8;
+            --accent-hover: #7dd3fc;
+            --text: #f8fafc;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+            --card-radius: 12px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px 16px;
+            display: flex;
+            justify-content: center;
+        }
+        .container { max-width: 960px; width: 100%; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        h1 { font-size: 1.4rem; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+        .badge-live {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .shares-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+        }
+        .share-pill {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .share-pill:hover, .share-pill.active {
+            background: var(--accent);
+            color: #090d16;
+            font-weight: 600;
+            border-color: var(--accent);
+        }
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+        }
+        .breadcrumb-item {
+            color: var(--accent);
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .breadcrumb-item:hover { text-decoration: underline; }
+        .browser-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        .file-list { list-style: none; }
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+        }
+        .file-item:last-child { border-bottom: none; }
+        .file-item:hover { background: var(--surface-hover); }
+        .file-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+            flex: 1;
+            cursor: pointer;
+        }
+        .file-icon { font-size: 1.25rem; flex-shrink: 0; }
+        .file-name {
+            font-size: 0.95rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .file-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-left: 12px;
+            flex-shrink: 0;
+        }
+        .file-actions { display: flex; gap: 8px; margin-left: 12px; }
+        .btn-action {
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-action:hover {
+            background: var(--accent);
+            color: #090d16;
+        }
+        .player-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+        .player-content {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .player-title {
+            font-size: 1.1rem;
+            color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .btn-close {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+        .btn-close:hover { color: #fff; }
+        video, audio {
+            width: 100%;
+            border-radius: 8px;
+            background: #000;
+            outline: none;
+        }
+        img.preview-img {
+            max-width: 100%;
+            max-height: 70vh;
+            display: block;
+            margin: 0 auto;
+            border-radius: 8px;
+        }
+        .empty-state {
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ Local Media Server</h1>
+            <div class="badge-live">Live Local Stream</div>
+        </header>
+
+        <div id="sharesNav" class="shares-nav"></div>
+        <div id="breadcrumbs" class="breadcrumbs"></div>
+
+        <div class="browser-card">
+            <ul id="fileList" class="file-list">
+                <li class="empty-state">Loading shared folders...</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Media Player Modal -->
+    <div id="playerModal" class="player-modal">
+        <div class="player-content">
+            <div class="player-header">
+                <div id="playerTitle" class="player-title"></div>
+                <button class="btn-close" onclick="closePlayer()">&times;</button>
+            </div>
+            <div id="playerMediaContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentShareId = null;
+        let currentPath = "";
+        let shares = [];
+
+        async function init() {
+            try {
+                const res = await fetch('/api/shares');
+                shares = await res.json();
+                renderSharesNav();
+                if (shares.length > 0) {
+                    selectShare(shares[0].id);
+                } else {
+                    document.getElementById('fileList').innerHTML =
+                        '<li class="empty-state">No folders shared yet. Use the host Android app to add a shared folder.</li>';
+                }
+            } catch (e) {
+                console.error(e);
+                document.getElementById('fileList').innerHTML =
+                    '<li class="empty-state">Failed to connect to local media server.</li>';
+            }
+        }
+
+        function renderSharesNav() {
+            const nav = document.getElementById('sharesNav');
+            nav.innerHTML = shares.map(s => 
+                `<button class="share-pill ${s.id === currentShareId ? 'active' : ''}" onclick="selectShare('${s.id}')">📁 ${s.name}</button>`
+            ).join('');
+        }
+
+        async function selectShare(shareId) {
+            currentShareId = shareId;
+            currentPath = "";
+            renderSharesNav();
+            await loadDirectory("");
+        }
+
+        async function loadDirectory(path) {
+            currentPath = path;
+            renderBreadcrumbs();
+            const listEl = document.getElementById('fileList');
+            listEl.innerHTML = '<li class="empty-state">Loading...</li>';
+
+            try {
+                const res = await fetch(`/api/shares/${currentShareId}/browse?path=${encodeURIComponent(path)}`);
+                if (!res.ok) throw new Error('Failed to load directory');
+                const items = await res.json();
+                renderItems(items);
+            } catch (e) {
+                listEl.innerHTML = `<li class="empty-state">Error loading folder: ${e.message}</li>`;
+            }
+        }
+
+        function renderBreadcrumbs() {
+            const bc = document.getElementById('breadcrumbs');
+            const share = shares.find(s => s.id === currentShareId);
+            const shareName = share ? share.name : "Root";
+
+            let html = `<span class="breadcrumb-item" onclick="loadDirectory('')">${shareName}</span>`;
+            if (currentPath) {
+                const parts = currentPath.split('/');
+                let accum = "";
+                for (let i = 0; i < parts.length; i++) {
+                    accum += (i === 0 ? "" : "/") + parts[i];
+                    const isLast = (i === parts.length - 1);
+                    const targetPath = accum;
+                    html += ` <span>/</span> `;
+                    if (isLast) {
+                        html += `<span>${parts[i]}</span>`;
+                    } else {
+                        html += `<span class="breadcrumb-item" onclick="loadDirectory('${targetPath}')">${parts[i]}</span>`;
+                    }
+                }
+            }
+            bc.innerHTML = html;
+        }
+
+        function renderItems(items) {
+            const listEl = document.getElementById('fileList');
+            if (!items || items.length === 0) {
+                listEl.innerHTML = '<li class="empty-state">This folder is empty.</li>';
+                return;
+            }
+
+            listEl.innerHTML = items.map(item => {
+                const icon = getItemIcon(item);
+                const sizeStr = item.isDirectory ? "" : formatBytes(item.size);
+
+                if (item.isDirectory) {
+                    return `
+                        <li class="file-item">
+                            <div class="file-left" onclick="loadDirectory('${item.relativePath}')">
+                                <span class="file-icon">${icon}</span>
+                                <span class="file-name">${item.name}</span>
+                            </div>
+                            <div class="file-meta">Folder</div>
+                        </li>
+                    `;
+                } else {
+                    const isPlayableMedia = item.mimeType.startsWith('video/') || item.mimeType.startsWith('audio/') || item.mimeType.startsWith('image/');
+                    const playBtn = isPlayableMedia 
+                        ? `<button class="btn-action" onclick="playMedia('${encodeURIComponent(item.name)}', '${item.streamUrl}', '${item.mimeType}')">▶ Play</button>`
+                        : '';
+                    return `
+                        <li class="file-item">
+                            <div class="file-left" ${isPlayableMedia ? `onclick="playMedia('${encodeURIComponent(item.name)}', '${item.streamUrl}', '${item.mimeType}')"` : ''}>
+                                <span class="file-icon">${icon}</span>
+                                <span class="file-name">${item.name}</span>
+                            </div>
+                            <div class="file-meta">${sizeStr}</div>
+                            <div class="file-actions">
+                                ${playBtn}
+                                <a class="btn-action" href="${item.downloadUrl}" download="${item.name}">⬇ Download</a>
+                            </div>
+                        </li>
+                    `;
+                }
+            }).join('');
+        }
+
+        function getItemIcon(item) {
+            if (item.isDirectory) return '📁';
+            const mime = item.mimeType;
+            if (mime.startsWith('video/')) return '🎬';
+            if (mime.startsWith('audio/')) return '🎵';
+            if (mime.startsWith('image/')) return '🖼️';
+            if (mime === 'application/pdf') return '📄';
+            return '📦';
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function playMedia(encodedName, streamUrl, mimeType) {
+            const name = decodeURIComponent(encodedName);
+            document.getElementById('playerTitle').innerText = name;
+            const container = document.getElementById('playerMediaContainer');
+
+            if (mimeType.startsWith('video/')) {
+                container.innerHTML = `
+                    <video controls autoplay playsinline preload="metadata">
+                        <source src="${streamUrl}" type="${mimeType}">
+                        Your browser does not support video playback for this format.
+                    </video>
+                `;
+            } else if (mimeType.startsWith('audio/')) {
+                container.innerHTML = `
+                    <audio controls autoplay preload="metadata">
+                        <source src="${streamUrl}" type="${mimeType}">
+                        Your browser does not support audio playback.
+                    </audio>
+                `;
+            } else if (mimeType.startsWith('image/')) {
+                container.innerHTML = `<img class="preview-img" src="${streamUrl}" alt="${name}">`;
+            }
+
+            document.getElementById('playerModal').style.display = 'flex';
+        }
+
+        function closePlayer() {
+            const container = document.getElementById('playerMediaContainer');
+            container.innerHTML = '';
+            document.getElementById('playerModal').style.display = 'none';
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

@@ -1,15 +1,17 @@
 package com.localserver.core
 
+import android.os.ParcelFileDescriptor
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.header
-import io.ktor.server.response.respondBytes
+import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytesWriter
-import io.ktor.server.response.respondText
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.writeFully
+import java.io.FileInputStream
 import java.io.InputStream
 import kotlin.math.min
 
@@ -63,26 +65,28 @@ object StreamingHandler {
     }
 
     /**
-     * Streams data from an InputStream or byte source with optional byte-range handling.
-     * Uses bounded buffers (64KB chunks) to prevent loading large files into memory.
+     * Streams data with HTTP Range and HEAD support.
+     * If a ParcelFileDescriptor is available, uses NIO FileChannel.position(start) for O(1) seeking.
      */
-    suspend fun streamContent(
+    suspend fun streamFile(
         call: ApplicationCall,
         contentType: ContentType,
         totalSize: Long,
-        fileName: String? = null,
-        openInputStream: () -> InputStream
+        fileName: String,
+        asAttachment: Boolean = false,
+        pfdProvider: (() -> ParcelFileDescriptor?)? = null,
+        streamProvider: () -> InputStream?
     ) {
         val rangeHeader = call.request.headers[HttpHeaders.Range]
         val range = parseRangeHeader(rangeHeader, totalSize)
+        val isHead = call.request.local.method == HttpMethod.Head
 
         call.response.header(HttpHeaders.AcceptRanges, "bytes")
-        if (fileName != null) {
-            call.response.header(
-                HttpHeaders.ContentDisposition,
-                "inline; filename=\"$fileName\""
-            )
-        }
+        val dispositionType = if (asAttachment) "attachment" else "inline"
+        call.response.header(
+            HttpHeaders.ContentDisposition,
+            "$dispositionType; filename=\"$fileName\""
+        )
 
         if (range != null) {
             // 206 Partial Content
@@ -92,45 +96,74 @@ object StreamingHandler {
             )
             call.response.header(HttpHeaders.ContentLength, range.contentLength.toString())
 
+            if (isHead) {
+                call.respond(HttpStatusCode.PartialContent)
+                return
+            }
+
             call.respondBytesWriter(
                 contentType = contentType,
                 status = HttpStatusCode.PartialContent
             ) {
-                openInputStream().use { stream ->
-                    copyRangeToChannel(stream, this, range.start, range.contentLength)
-                }
+                streamData(this, range.start, range.contentLength, pfdProvider, streamProvider)
             }
         } else {
             // 200 OK
             call.response.header(HttpHeaders.ContentLength, totalSize.toString())
 
+            if (isHead) {
+                call.respond(HttpStatusCode.OK)
+                return
+            }
+
             call.respondBytesWriter(
                 contentType = contentType,
                 status = HttpStatusCode.OK
             ) {
-                openInputStream().use { stream ->
-                    copyRangeToChannel(stream, this, 0L, totalSize)
-                }
+                streamData(this, 0L, totalSize, pfdProvider, streamProvider)
             }
         }
     }
 
-    private suspend fun copyRangeToChannel(
-        input: InputStream,
+    private suspend fun streamData(
         channel: ByteWriteChannel,
-        skipBytes: Long,
-        length: Long
+        startOffset: Long,
+        length: Long,
+        pfdProvider: (() -> ParcelFileDescriptor?)?,
+        streamProvider: () -> InputStream?
     ) {
-        if (skipBytes > 0) {
-            var skipped = 0L
-            while (skipped < skipBytes) {
-                val n = input.skip(skipBytes - skipped)
-                if (n <= 0) break
-                skipped += n
+        val pfd = pfdProvider?.invoke()
+        if (pfd != null) {
+            pfd.use { descriptor ->
+                FileInputStream(descriptor.fileDescriptor).use { fis ->
+                    if (startOffset > 0) {
+                        fis.channel.position(startOffset)
+                    }
+                    copyBounded(fis, channel, length)
+                }
+            }
+        } else {
+            val stream = streamProvider() ?: return
+            stream.use { fis ->
+                if (startOffset > 0) {
+                    var skipped = 0L
+                    while (skipped < startOffset) {
+                        val n = fis.skip(startOffset - skipped)
+                        if (n <= 0) break
+                        skipped += n
+                    }
+                }
+                copyBounded(fis, channel, length)
             }
         }
+    }
 
-        val buffer = ByteArray(64 * 1024) // 64 KB bounded buffer
+    private suspend fun copyBounded(
+        input: InputStream,
+        channel: ByteWriteChannel,
+        length: Long
+    ) {
+        val buffer = ByteArray(64 * 1024) // 64 KB bounded chunk buffer
         var remaining = length
         while (remaining > 0) {
             val toRead = min(remaining, buffer.size.toLong()).toInt()

@@ -6,15 +6,20 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.Gravity
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.button.MaterialButton
 import com.localserver.core.NetworkAddress
 import com.localserver.core.ServerConfig
 import com.localserver.core.ServerService
 import com.localserver.core.ServerState
+import com.localserver.core.ShareRoot
 import com.localserver.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 
@@ -30,6 +35,16 @@ class MainActivity : AppCompatActivity() {
                     "Notification permission is recommended to keep server running in background.",
                     Toast.LENGTH_LONG
                 ).show()
+            }
+        }
+
+    private val openDocumentTreeLauncher =
+        registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+            if (uri != null) {
+                val newShare = ServerService.shareRegistry.addShare(uri)
+                if (newShare != null) {
+                    Toast.makeText(this, "Shared folder: ${newShare.name}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
@@ -75,6 +90,10 @@ class MainActivity : AppCompatActivity() {
             ServerService.stopServer(this)
         }
 
+        binding.btnAddFolder.setOnClickListener {
+            openDocumentTreeLauncher.launch(null)
+        }
+
         binding.btnOpenBrowser.setOnClickListener {
             val state = ServerService.serviceState.value
             if (state is ServerState.Running) {
@@ -103,6 +122,63 @@ class MainActivity : AppCompatActivity() {
                 }
                 updateAddressDisplay(addresses, port)
             }
+        }
+
+        lifecycleScope.launch {
+            ServerService.shareRegistry.shares.collect { shares ->
+                renderSharesList(shares)
+            }
+        }
+    }
+
+    private fun renderSharesList(shares: List<ShareRoot>) {
+        binding.layoutSharesContainer.removeAllViews()
+
+        if (shares.isEmpty()) {
+            binding.layoutSharesContainer.addView(binding.tvEmptyShares)
+            return
+        }
+
+        for (share in shares) {
+            val itemLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(0, 8, 0, 8)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            }
+
+            val iconAndName = TextView(this).apply {
+                text = "📁 ${share.name}"
+                setTextColor(ContextCompat.getColor(this@MainActivity, R.color.text_primary))
+                textSize = 14f
+                layoutParams = LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f
+                )
+            }
+
+            val removeBtn = MaterialButton(
+                this,
+                null,
+                com.google.android.material.R.attr.borderlessButtonStyle
+            ).apply {
+                text = "✕"
+                setTextColor(ContextCompat.getColor(this@MainActivity, R.color.status_red))
+                minWidth = 0
+                minimumWidth = 0
+                setPadding(16, 0, 16, 0)
+                setOnClickListener {
+                    ServerService.shareRegistry.removeShare(share.id)
+                }
+            }
+
+            itemLayout.addView(iconAndName)
+            itemLayout.addView(removeBtn)
+            binding.layoutSharesContainer.addView(itemLayout)
         }
     }
 

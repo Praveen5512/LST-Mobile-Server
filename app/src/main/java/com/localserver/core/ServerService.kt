@@ -193,6 +193,8 @@ class ServerService : Service() {
 
         // Singleton instances shared across app
         lateinit var networkManager: NetworkManager
+        lateinit var shareRegistry: ShareRegistry
+        lateinit var fileRepository: FileRepository
         lateinit var serverController: ServerController
 
         private val _serviceState = MutableStateFlow<ServerState>(ServerState.Stopped)
@@ -200,8 +202,11 @@ class ServerService : Service() {
 
         fun initSingletons(context: Context) {
             if (!::networkManager.isInitialized) {
-                networkManager = NetworkManager(context.applicationContext)
-                serverController = ServerController(networkManager)
+                val appCtx = context.applicationContext
+                networkManager = NetworkManager(appCtx)
+                shareRegistry = ShareRegistry(appCtx)
+                fileRepository = FileRepository(appCtx, shareRegistry)
+                serverController = ServerController(appCtx, networkManager, shareRegistry, fileRepository)
             }
         }
 

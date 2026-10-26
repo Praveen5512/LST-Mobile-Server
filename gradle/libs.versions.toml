@@ -16,6 +16,7 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version = "1.0.1" }
 
 ktor-server-core = { group = "io.ktor", name = "ktor-server-core", version.ref = "ktor" }
 ktor-server-cio = { group = "io.ktor", name = "ktor-server-cio", version.ref = "ktor" }

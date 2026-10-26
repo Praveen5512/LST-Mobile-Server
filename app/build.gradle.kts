@@ -21,6 +21,10 @@ android {
         viewBinding = true
     }
 
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -60,6 +64,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.documentfile)
 
     // Ktor embedded server
     implementation(libs.ktor.server.core)
