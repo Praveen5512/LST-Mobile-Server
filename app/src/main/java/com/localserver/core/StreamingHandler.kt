@@ -105,7 +105,11 @@ object StreamingHandler {
                 contentType = contentType,
                 status = HttpStatusCode.PartialContent
             ) {
-                streamData(this, range.start, range.contentLength, pfdProvider, streamProvider)
+                try {
+                    streamData(this, range.start, range.contentLength, pfdProvider, streamProvider)
+                } catch (_: Throwable) {
+                    // Client disconnected or connection was interrupted
+                }
             }
         } else {
             // 200 OK
@@ -120,7 +124,11 @@ object StreamingHandler {
                 contentType = contentType,
                 status = HttpStatusCode.OK
             ) {
-                streamData(this, 0L, totalSize, pfdProvider, streamProvider)
+                try {
+                    streamData(this, 0L, totalSize, pfdProvider, streamProvider)
+                } catch (_: Throwable) {
+                    // Client disconnected or connection was interrupted
+                }
             }
         }
     }
