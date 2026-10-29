@@ -58,20 +58,9 @@
 * **Cross-Device Ready**: Designed with a sleek dark-mode UI for phones, tablets, laptops, and TV browsers.
 * **Media Sections**: Dedicated tabs for **Browse**, **Videos**, **Music**, and **Photos** with interactive playback and thumbnail galleries.
 
----
 
-## 📱 Screenshots & Interface
 
-<p align="center">
-  <img src="docs/images/mobile_explorer.jpg" alt="LST Mobile Server - Explorer Screen" width="340" />
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/images/breadcrumb_navigation.jpg" alt="Folder Navigation &amp; Breadcrumbs" width="340" />
-</p>
 
-<p align="center">
-  <em>Left: LST Mobile Server Explorer interface with connected server status, quick server switching, and search.<br />
-  Right: Fast breadcrumb navigation across root shares and media subfolders.</em>
-</p>
 
 ---
 
