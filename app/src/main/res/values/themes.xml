@@ -2,9 +2,34 @@
     <style name="Theme.LocalMediaServer" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/accent</item>
         <item name="colorPrimaryVariant">@color/primary_variant</item>
-        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorOnPrimary">#090D16</item>
+        <item name="colorSecondary">@color/accent</item>
+        <item name="colorOnSecondary">#090D16</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
         <item name="android:windowBackground">@color/background</item>
         <item name="android:statusBarColor">@color/background</item>
-        <item name="android:navigationBarColor">@color/background</item>
+        <item name="android:navigationBarColor">@color/surface</item>
+        <item name="bottomNavigationStyle">@style/Widget.App.BottomNavigationView</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
+    </style>
+
+    <style name="Widget.App.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="android:background">@color/surface</item>
+        <item name="itemIconTint">@color/nav_item_color</item>
+        <item name="itemTextColor">@color/nav_item_color</item>
+        <item name="itemRippleColor">@color/surface_border</item>
+        <item name="elevation">8dp</item>
+    </style>
+
+    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorPrimary">@color/accent</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.App.Dialog</item>
+    </style>
+
+    <style name="ShapeAppearance.App.Dialog" parent="">
+        <item name="cornerSize">16dp</item>
     </style>
 </resources>

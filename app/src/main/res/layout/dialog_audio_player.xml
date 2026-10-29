@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/surface"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_file_audio" />
+
+        <TextView
+            android:id="@+id/tvAudioTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:ellipsize="middle"
+            android:maxLines="1"
+            android:text="Audio Preview"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/btnAudioOpenExternal"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="8dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:padding="4dp"
+            android:src="@drawable/ic_open_in_new"
+            app:tint="@color/accent" />
+
+        <ImageView
+            android:id="@+id/btnCloseAudio"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:padding="4dp"
+            android:src="@drawable/ic_close" />
+
+    </LinearLayout>
+
+    <!-- Seekbar & Times -->
+    <SeekBar
+        android:id="@+id/seekBarAudio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:progressTint="@color/accent"
+        android:thumbTint="@color/accent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvAudioCurrentTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/tvAudioDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <!-- Controls -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAudioPlayPause"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:backgroundTint="@color/accent"
+            android:insetLeft="0dp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetBottom="0dp"
+            app:cornerRadius="28dp"
+            app:icon="@drawable/ic_play"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="28dp"
+            app:iconTint="@color/background" />
+
+    </LinearLayout>
+
+</LinearLayout>

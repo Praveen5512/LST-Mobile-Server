@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">Local Media Server</string>
+    <string name="app_name">LST Mobile Server</string>
+    <string name="app_version">1.0.0</string>
     <string name="server_status_stopped">Server Stopped</string>
     <string name="server_status_starting">Starting Server…</string>
     <string name="server_status_running">Server Running</string>
@@ -9,13 +10,50 @@
     <string name="port_label">Port</string>
     <string name="interfaces_label">Network Interfaces &amp; URLs</string>
     <string name="no_network_found">No active Wi-Fi or Hotspot network detected. Please connect to Wi-Fi or turn on Hotspot.</string>
-    <string name="notification_channel_name">Media Server Service</string>
+    <string name="notification_channel_name">LST Mobile Server Service</string>
     <string name="notification_channel_desc">Shows ongoing status while the local HTTP server is running.</string>
-    <string name="notification_title">Local Media Server is Active</string>
+    <string name="notification_title">LST Mobile Server is Active</string>
     <string name="notification_stop_action">Stop Server</string>
     <string name="open_in_browser">Open in Local Browser</string>
     <string name="security_notice">⚠️ Anyone on the same Wi-Fi or Hotspot network can access files shared by this server.</string>
     <string name="shared_folders_label">Shared Folders</string>
     <string name="btn_add_folder">+ Add Folder</string>
     <string name="no_folders_shared">No folders shared yet. Tap \"+ Add Folder\" to select directories to share.</string>
+
+    <!-- Navigation -->
+    <string name="nav_explorer">Explorer</string>
+    <string name="nav_discover">Discover</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Explorer Screen -->
+    <string name="explorer_title">Explorer</string>
+    <string name="no_server_connected">No server connected</string>
+    <string name="switch_server">Switch Server</string>
+    <string name="downloads_tab">Downloads</string>
+    <string name="files_tab">Browse Files</string>
+    <string name="folder_empty">This folder is empty</string>
+    <string name="download_file">Download</string>
+    <string name="download_confirm_title">Confirm Download</string>
+    <string name="keep_screen_on">Keep screen on while downloading</string>
+    <string name="destination_label">Download Destination:</string>
+    <string name="change_destination">Change Destination</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Discover Screen -->
+    <string name="discover_title">Discover Devices</string>
+    <string name="scan_network">Scan Network</string>
+    <string name="stop_scan">Stop Scan</string>
+    <string name="refresh">Refresh</string>
+    <string name="open_client">📱 Open Client</string>
+    <string name="browser">🌐 Browser</string>
+    <string name="manual_connect_title">Manual Address Connection</string>
+    <string name="connect">Connect</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="section_server">Server</string>
+    <string name="section_shared_folders">Shared Folders</string>
+    <string name="section_network">Network</string>
+    <string name="section_security">Security</string>
+    <string name="section_about">About &amp; Diagnostics</string>
 </resources>

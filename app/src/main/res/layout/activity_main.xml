@@ -1,575 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
-    android:fillViewport="true">
+    android:orientation="vertical">
 
+    <!-- Top Compact Header & Server Status Bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:background="@color/surface"
+        android:elevation="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="16dp"
+        android:paddingTop="12dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="12dp">
 
-        <!-- Header -->
-        <TextView
-            android:id="@+id/tvAppTitle"
+        <ImageView
+            android:id="@+id/ivAppHeaderLogo"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="10dp"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_launcher" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvAppHeaderTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textColor="@color/accent"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvCurrentScreenSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Explorer"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+        <!-- Compact Server Status Indicator Badge -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardHeaderServerStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            android:textColor="@color/accent"
-            android:textSize="22sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Local Network Media &amp; File Server"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
-
-        <!-- Local Network Security Notice Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="@color/surface_card"
+            app:cardCornerRadius="16dp"
             app:cardElevation="0dp"
             app:strokeColor="@color/surface_border"
             app:strokeWidth="1dp">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="14dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🛡️ Local Network Security Notice"
-                    android:textColor="@color/accent"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Shared files are accessible read-only to any device on the same Wi-Fi or hotspot. Only add folders intended for local sharing."
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
-                    android:lineSpacingExtra="2dp" />
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Status Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:strokeColor="@color/surface_border"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/tvStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/server_status_stopped"
-                    android:textColor="@color/status_red"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvStatusDetail"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Server is not running. Configure port and press Start."
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp" />
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Battery Optimization Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardBatteryOptimization"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:visibility="gone"
-            app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:strokeColor="#F59E0B"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🔋 Keep Server Alive When Screen Locks"
-                    android:textColor="#F59E0B"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Allowing background battery exemption prevents Android from putting Wi-Fi and the server to sleep when your screen is locked."
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnDisableBatteryOptimization"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="38dp"
-                    android:layout_marginTop="10dp"
-                    android:text="Disable Battery Optimization"
-                    android:textAllCaps="false"
-                    android:textColor="#F59E0B"
-                    android:textSize="12sp"
-                    app:cornerRadius="6dp"
-                    app:strokeColor="#F59E0B" />
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Configuration Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:strokeColor="@color/surface_border"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilPort"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/port_label"
-                    android:textColorHint="@color/text_secondary"
-                    app:boxBackgroundColor="@color/primary"
-                    app:boxStrokeColor="@color/accent"
-                    app:hintTextColor="@color/accent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etPort"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="number"
-                        android:text="8080"
-                        android:textColor="@color/text_primary" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnStart"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_weight="1"
-                        android:backgroundTint="@color/status_green"
-                        android:text="@string/btn_start_server"
-                        android:textAllCaps="false"
-                        android:textColor="#FFFFFF"
-                        app:cornerRadius="8dp" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnStop"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_marginStart="12dp"
-                        android:layout_weight="1"
-                        android:backgroundTint="@color/status_red"
-                        android:enabled="false"
-                        android:text="@string/btn_stop_server"
-                        android:textAllCaps="false"
-                        android:textColor="#FFFFFF"
-                        app:cornerRadius="8dp" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Shared Folders Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:strokeColor="@color/surface_border"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/shared_folders_label"
-                        android:textColor="@color/text_primary"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnAddFolder"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="36dp"
-                        android:insetTop="0dp"
-                        android:insetBottom="0dp"
-                        android:paddingHorizontal="12dp"
-                        android:text="@string/btn_add_folder"
-                        android:textAllCaps="false"
-                        android:textColor="@color/accent"
-                        android:textSize="12sp"
-                        app:cornerRadius="6dp"
-                        app:strokeColor="@color/accent" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/layoutSharesContainer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/tvEmptyShares"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/no_folders_shared"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- URLs & Interfaces Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:strokeColor="@color/surface_border"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/interfaces_label"
-                    android:textColor="@color/text_primary"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvUrls"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:fontFamily="monospace"
-                    android:lineSpacingExtra="4dp"
-                    android:text="@string/no_network_found"
-                    android:textColor="@color/accent"
-                    android:textSize="13sp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnShowQrCode"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="44dp"
-                        android:layout_weight="1"
-                        android:enabled="false"
-                        android:text="📱 QR Code"
-                        android:textAllCaps="false"
-                        android:textColor="@color/accent"
-                        app:cornerRadius="8dp"
-                        app:strokeColor="@color/accent" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnCopyUrl"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="44dp"
-                        android:layout_marginStart="10dp"
-                        android:layout_weight="1"
-                        android:enabled="false"
-                        android:text="📋 Copy URL"
-                        android:textAllCaps="false"
-                        android:textColor="@color/accent"
-                        app:cornerRadius="8dp"
-                        app:strokeColor="@color/accent" />
-
-                </LinearLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnOpenInAppViewer"
-                    android:layout_width="match_parent"
-                    android:layout_height="44dp"
-                    android:layout_marginTop="10dp"
-                    android:backgroundTint="@color/accent"
-                    android:enabled="false"
-                    android:text="📱 Open In-App Frontend"
-                    android:textAllCaps="false"
-                    android:textColor="#000000"
-                    app:cornerRadius="8dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnOpenBrowser"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="44dp"
-                    android:layout_marginTop="8dp"
-                    android:enabled="false"
-                    android:text="@string/open_in_browser"
-                    android:textAllCaps="false"
-                    android:textColor="@color/accent"
-                    app:cornerRadius="8dp"
-                    app:strokeColor="@color/accent" />
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Network Discovery & Frontend Client Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/surface"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:strokeColor="@color/surface_border"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="📡 Discovered Local Servers"
-                    android:textColor="@color/text_primary"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Discover other media servers running on this Wi-Fi or hotspot network and browse their content."
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnScanServers"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="38dp"
-                        android:insetTop="0dp"
-                        android:insetBottom="0dp"
-                        android:text="🔍 Scan Network"
-                        android:textAllCaps="false"
-                        android:textColor="@color/accent"
-                        android:textSize="12sp"
-                        app:cornerRadius="6dp"
-                        app:strokeColor="@color/accent" />
-
-                    <ProgressBar
-                        android:id="@+id/progressScanning"
-                        style="?android:attr/progressBarStyleSmall"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginStart="12dp"
-                        android:visibility="gone" />
-
-                    <TextView
-                        android:id="@+id/tvScanStatus"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_weight="1"
-                        android:text="Ready to scan"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
-
-                </LinearLayout>
-
-                <!-- Discovered servers dynamic list -->
-                <LinearLayout
-                    android:id="@+id/layoutDiscoveredServers"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/tvNoDiscoveredServers"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="No servers discovered yet. Tap &quot;Scan Network&quot; or enter an address below."
-                        android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
-
-                </LinearLayout>
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="10dp"
+                android:paddingTop="5dp"
+                android:paddingRight="10dp"
+                android:paddingBottom="5dp">
 
                 <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginVertical="16dp"
-                    android:background="@color/surface_border" />
+                    android:id="@+id/viewHeaderStatusDot"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:background="@drawable/ic_check_circle"
+                    android:backgroundTint="@color/status_red" />
 
-                <!-- Manual Connection -->
                 <TextView
+                    android:id="@+id/tvHeaderStatusText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Manual Address Connection"
-                    android:textColor="@color/text_primary"
-                    android:textSize="13sp"
+                    android:layout_marginStart="6dp"
+                    android:text="Server Stopped"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp"
                     android:textStyle="bold" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilManualUrl"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="http://192.168.1.x:8080"
-                        android:textColorHint="@color/text_secondary"
-                        app:boxBackgroundColor="@color/primary"
-                        app:boxStrokeColor="@color/accent"
-                        app:hintTextColor="@color/accent">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etManualUrl"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textUri"
-                            android:text="http://192.168."
-                            android:textColor="@color/text_primary"
-                            android:textSize="13sp" />
-
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnConnectManual"
-                        android:layout_width="wrap_content"
-                        android:layout_height="52dp"
-                        android:layout_marginStart="8dp"
-                        android:backgroundTint="@color/accent"
-                        android:text="Connect"
-                        android:textAllCaps="false"
-                        android:textColor="#000000"
-                        app:cornerRadius="8dp" />
-
-                </LinearLayout>
 
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
-
-        <!-- Security Notice -->
-        <TextView
-            android:id="@+id/tvSecurityNotice"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/ic_launcher_background"
-            android:backgroundTint="#1F2A1E0E"
-            android:lineSpacingExtra="2dp"
-            android:padding="12dp"
-            android:text="@string/security_notice"
-            android:textColor="#F59E0B"
-            android:textSize="12sp" />
 
     </LinearLayout>
 
-</ScrollView>
+    <!-- Main Screens Container (ViewPager2 for smooth transitions without rebuilding) -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Persistent Bottom Navigation Bar -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        style="@style/Widget.App.BottomNavigationView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/menu_bottom_nav" />
+
+</LinearLayout>

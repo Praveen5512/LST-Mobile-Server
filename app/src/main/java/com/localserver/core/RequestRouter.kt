@@ -14,6 +14,7 @@ import io.ktor.server.routing.head
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import java.io.ByteArrayInputStream
+import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import org.json.JSONArray
 import org.json.JSONObject
@@ -35,7 +36,7 @@ class RequestRouter(
                         reader.readText()
                     }
                 } catch (e: Exception) {
-                    "<html><body><h1>Local Media Server</h1><p>Error loading client assets: ${e.message}</p></body></html>"
+                    "<html><body><h1>LST Mobile Server</h1><p>Error loading client assets: ${e.message}</p></body></html>"
                 }
                 call.respondText(html, ContentType.Text.Html.withCharset(Charsets.UTF_8))
             }
@@ -44,7 +45,7 @@ class RequestRouter(
             get("/sample.txt") {
                 val sampleContent = buildString {
                     appendLine("==================================================")
-                    appendLine("Android Local Media Server - Sample Test File")
+                    appendLine("Android LST Mobile Server - Sample Test File")
                     appendLine("Milestone 1 & 2 Verification")
                     appendLine("==================================================")
                     appendLine("Timestamp: ${System.currentTimeMillis()}")
@@ -92,8 +93,49 @@ class RequestRouter(
                 call.respondText(json.toString(), ContentType.Application.Json)
             }
 
-            // Media Library API (aggregated videos, audio, photos)
+            // Media Library & Directory Browsing API
             get("/api/media") {
+                val targetShareId = call.request.queryParameters["shareId"]
+                if (targetShareId != null) {
+                    val share = shareRegistry.getShare(targetShareId)
+                    if (share == null) {
+                        call.respond(HttpStatusCode.NotFound, "Share not found")
+                        return@get
+                    }
+                    val path = call.request.queryParameters["path"] ?: ""
+                    val items = fileRepository.listDirectory(targetShareId, path)
+                    if (items == null) {
+                        call.respond(HttpStatusCode.NotFound, "Directory not found or access denied")
+                        return@get
+                    }
+                    val itemsArray = JSONArray()
+                    for (item in items) {
+                        itemsArray.put(
+                            JSONObject().apply {
+                                put("name", item.name)
+                                put("path", item.relativePath)
+                                put("isDirectory", item.isDirectory)
+                                put("size", item.size)
+                                put("mimeType", if (item.isDirectory) "application/x-directory" else item.mimeType)
+                                put("modified", item.lastModified)
+                                if (!item.isDirectory) {
+                                    val encodedPath = URLEncoder.encode(item.relativePath, StandardCharsets.UTF_8.name())
+                                    put("streamUrl", "/api/stream?shareId=$targetShareId&path=$encodedPath")
+                                    put("downloadUrl", "/api/shares/$targetShareId/files/${item.id}/download")
+                                }
+                            }
+                        )
+                    }
+                    val responseObj = JSONObject().apply {
+                        put("shareId", share.id)
+                        put("shareName", share.name)
+                        put("currentPath", path)
+                        put("items", itemsArray)
+                    }
+                    call.respondText(responseObj.toString(), ContentType.Application.Json)
+                    return@get
+                }
+
                 val type = call.request.queryParameters["type"] ?: "all"
                 val items = fileRepository.findMediaFiles(type)
                 val array = JSONArray()
@@ -115,6 +157,16 @@ class RequestRouter(
                 call.respondText(array.toString(), ContentType.Application.Json)
             }
 
+            // Direct streaming endpoint for Android TV ExoPlayer: /api/stream?shareId={shareId}&path={encodedPath}
+            route("/api/stream") {
+                get {
+                    handleStreamByPath(call, asAttachment = false)
+                }
+                head {
+                    handleStreamByPath(call, asAttachment = false)
+                }
+            }
+
             // Shares API
             route("/api/shares") {
                 get {
@@ -125,6 +177,8 @@ class RequestRouter(
                             JSONObject().apply {
                                 put("id", share.id)
                                 put("name", share.name)
+                                put("uri", share.uriString)
+                                put("isAccessible", share.isAccessible)
                                 put("createdAt", share.createdAt)
                             }
                         )
@@ -219,4 +273,38 @@ class RequestRouter(
             streamProvider = { fileRepository.openInputStream(resolved.uri) }
         )
     }
+
+    private suspend fun handleStreamByPath(call: io.ktor.server.application.ApplicationCall, asAttachment: Boolean) {
+        val shareId = call.request.queryParameters["shareId"] ?: run {
+            call.respond(HttpStatusCode.BadRequest, "Missing shareId parameter")
+            return
+        }
+        val path = call.request.queryParameters["path"] ?: run {
+            call.respond(HttpStatusCode.BadRequest, "Missing path parameter")
+            return
+        }
+
+        val resolved = fileRepository.resolveFile(shareId, path)
+        if (resolved == null) {
+            call.respond(HttpStatusCode.NotFound, "File not found or access denied")
+            return
+        }
+
+        val parsedContentType = try {
+            ContentType.parse(resolved.mimeType)
+        } catch (_: Exception) {
+            ContentType.Application.OctetStream
+        }
+
+        StreamingHandler.streamFile(
+            call = call,
+            contentType = parsedContentType,
+            totalSize = resolved.size,
+            fileName = resolved.name,
+            asAttachment = asAttachment,
+            pfdProvider = { fileRepository.openFileDescriptor(resolved.uri) },
+            streamProvider = { fileRepository.openInputStream(resolved.uri) }
+        )
+    }
 }
+

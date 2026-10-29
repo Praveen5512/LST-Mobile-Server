@@ -28,6 +28,7 @@ class ServerService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + Job())
     private var wakeLock: PowerManager.WakeLock? = null
     private var wifiLock: WifiManager.WifiLock? = null
+    private var multicastLock: WifiManager.MulticastLock? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -41,7 +42,8 @@ class ServerService : Service() {
                 _serviceState.value = state
                 updateNotification(state)
                 if (state is ServerState.Running) {
-                    nsdDiscoveryManager.registerServer(state.config.port)
+                    val ips = networkManager.availableAddresses.value.map { it.ipAddress }
+                    nsdDiscoveryManager.registerServer(state.config.port, customName = state.config.serverName, ipAddresses = ips)
                 } else if (state is ServerState.Stopped) {
                     nsdDiscoveryManager.unregisterServer()
                     stopForeground(STOP_FOREGROUND_REMOVE)
@@ -57,6 +59,8 @@ class ServerService : Service() {
                 val currentState = serverController.serverState.value
                 if (currentState is ServerState.Running) {
                     updateNotification(currentState.copy(addresses = addresses))
+                    val ips = addresses.map { it.ipAddress }
+                    nsdDiscoveryManager.refreshServer(currentState.config.port, ips)
                 }
             }
         }
@@ -66,7 +70,7 @@ class ServerService : Service() {
         if (intent == null) {
             val config = lastConfig ?: ServerConfig()
             Log.i(TAG, "ServerService auto-restarting after system kill on port ${config.port}")
-            startForeground(NOTIFICATION_ID, buildNotification("Restoring local media server..."))
+            startForeground(NOTIFICATION_ID, buildNotification("Restoring LST Mobile Server..."))
             serverController.start(config)
             return START_STICKY
         }
@@ -79,10 +83,11 @@ class ServerService : Service() {
             ACTION_START -> {
                 val port = intent.getIntExtra(EXTRA_PORT, ServerConfig.DEFAULT_PORT)
                 val bind = intent.getStringExtra(EXTRA_BIND_ADDRESS) ?: ServerConfig.DEFAULT_BIND_ADDRESS
-                val config = ServerConfig(port = port, bindAddress = bind)
+                val name = intent.getStringExtra(EXTRA_SERVER_NAME) ?: ServerConfig.getSavedServerName(this)
+                val config = ServerConfig(port = port, bindAddress = bind, serverName = name)
                 lastConfig = config
-                Log.i(TAG, "Received ACTION_START intent for port $port on $bind")
-                startForeground(NOTIFICATION_ID, buildNotification("Starting local media server..."))
+                Log.i(TAG, "Received ACTION_START intent for port $port on $bind (name=$name)")
+                startForeground(NOTIFICATION_ID, buildNotification("Starting LST Mobile Server..."))
                 serverController.start(config)
             }
             else -> {
@@ -190,6 +195,11 @@ class ServerService : Service() {
                 setReferenceCounted(false)
                 acquire()
             }
+
+            multicastLock = wifiManager?.createMulticastLock("LocalMediaServer:ServiceMulticastLock")?.apply {
+                setReferenceCounted(false)
+                acquire()
+            }
         } catch (e: Exception) {
             Log.w(TAG, "Failed to acquire wake/wifi locks: ${e.message}")
         }
@@ -201,6 +211,8 @@ class ServerService : Service() {
             wakeLock = null
             wifiLock?.let { if (it.isHeld) it.release() }
             wifiLock = null
+            multicastLock?.let { if (it.isHeld) it.release() }
+            multicastLock = null
         } catch (e: Exception) {
             Log.w(TAG, "Failed to release wake/wifi locks: ${e.message}")
         }
@@ -215,6 +227,7 @@ class ServerService : Service() {
         const val ACTION_STOP = "com.localserver.action.STOP"
         const val EXTRA_PORT = "extra_port"
         const val EXTRA_BIND_ADDRESS = "extra_bind_address"
+        const val EXTRA_SERVER_NAME = "extra_server_name"
 
         // Singleton instances shared across app
         lateinit var networkManager: NetworkManager
@@ -238,12 +251,19 @@ class ServerService : Service() {
             }
         }
 
-        fun startServer(context: Context, port: Int, bindAddress: String = ServerConfig.DEFAULT_BIND_ADDRESS) {
+        fun startServer(
+            context: Context,
+            port: Int,
+            bindAddress: String = ServerConfig.DEFAULT_BIND_ADDRESS,
+            serverName: String? = null
+        ) {
             initSingletons(context)
+            val name = serverName ?: ServerConfig.getSavedServerName(context)
             val intent = Intent(context, ServerService::class.java).apply {
                 action = ACTION_START
                 putExtra(EXTRA_PORT, port)
                 putExtra(EXTRA_BIND_ADDRESS, bindAddress)
+                putExtra(EXTRA_SERVER_NAME, name)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
